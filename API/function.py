@@ -1,6 +1,3 @@
-import math
-import cmath
-import numpy as np
 from config import *
 
 
@@ -15,28 +12,27 @@ class Function:
         return out
 
     def get_coefficients(self):
-        start = round(NUM/2 - 1)
+        start = -round(NUM/2 - 1)
         coeffs = []
-        for n in range(start, start+NUM):
+        steps = np.arange(start, start+NUM)
+        for n in steps:
+            coeff = self.get_coefficient(n)
             coeffs.append(self.get_coefficient(n))
-        return coeffs
+        return dict(zip(steps, coeffs))
 
     def func(self, t):
         return self.value_dict[t]
 
     @np.vectorize
     def shifted_func(self, n, t):
-        return self.func(t) * E**(-n*2*PI*1j*t)
+        return self.func(t) * E**(-n*2*PI*1j*t) * DT
 
 
 if __name__ == "__main__":
     myfunc = lambda x: complex(math.cos(2*PI*x), (math.sin(2*PI*x)))
     values = [myfunc(x) for x in np.arange(0, 1+DT, DT)]
     vdict = dict(zip(np.arange(0, 1+DT, DT), values))
-    print(vdict[0.04])
     func = Function(vdict)
     coeffs = func.get_coefficients()
-    print(coeffs)
-
 
 
