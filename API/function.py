@@ -16,7 +16,6 @@ class Function:
         coeffs = []
         steps = np.arange(start, start+NUM)
         for n in steps:
-            coeff = self.get_coefficient(n)
             coeffs.append(self.get_coefficient(n))
         return dict(zip(steps, coeffs))
 
@@ -26,6 +25,10 @@ class Function:
     @np.vectorize
     def shifted_func(self, n, t):
         return self.func(t) * E**(-n*2*PI*1j*t) * DT
+
+
+def function_sampler(function):
+    pass
 
 
 if __name__ == "__main__":

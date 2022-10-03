@@ -1,14 +1,11 @@
-import cv2
 import matplotlib.pyplot as plt
-
-# Open the image
-img = cv2.imread('apple.jpeg')
-
-# Apply Canny
-edges = cv2.Canny(img, 100, 200, 3, L2gradient=True)
-
-plt.figure()
-plt.title('apple')
-plt.imsave('apple.png', edges, cmap='gray', format='png')
-plt.imshow(edges, cmap='gray')
+plt.rcParams["figure.figsize"] = [7.50, 3.50]
+plt.rcParams["figure.autolayout"] = True
+point1 = [1, 2]
+point2 = [3, 4]
+point3 = [2, 1]
+x_values = [point1[0], point2[0]]
+y_values = [point1[1], point2[1]]
+plt.plot(x_values, y_values, 'bo', linestyle="--")
+plt.plot([2, 2.5],[1, 3], 'bo', linestyle="--")
 plt.show()
