@@ -2,21 +2,13 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
  "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="820.000000pt" height="420.000000pt" viewBox="0 0 820.000000 420.000000"
+ width="800.000000pt" height="420.000000pt" viewBox="0 0 800.000000 420.000000"
  preserveAspectRatio="xMidYMid meet">
 <metadata>
 Created by potrace 1.16, written by Peter Selinger 2001-2019
 </metadata>
-<g transform="translate(0.000000,420.000000) scale(0.100000,-0.100000)"
+<g transform="translate(0.000000,420.000000) scale(0.100000, -0.100000)"
 fill="#000000" stroke="none">
-    <path d="M3356 3789 c-424 -19 -603 -64 -734 -183 -77 -71 -113 -129 -281
--452 z"/>
-    <circle cx="3356" cy="3789" r="10" stroke="red" fill="transparent" stroke-width="5"/>
-    <circle cx="2932" cy="3770" r="10" stroke="red" fill="transparent" stroke-width="5"/>
-    <circle cx="2753" cy="3725" r="10" stroke="red" fill="transparent" stroke-width="5"/>
-    <circle cx="2622" cy="3606" r="10" stroke="red" fill="transparent" stroke-width="5"/>
-    <circle cx="3279" cy="3718" r="10" stroke="red" fill="transparent" stroke-width="5"/>
-    <circle cx="3243" cy="3660" r="10" stroke="red" fill="transparent" stroke-width="5"/>
-    <circle cx="3075" cy="3337" r="10" stroke="red" fill="transparent" stroke-width="5"/>
+    <path d="M100,200 C100,100 400,100 400,200"/>
 </g>
 </svg>
