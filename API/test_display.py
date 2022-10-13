@@ -2,6 +2,8 @@ from config import *
 from function import Function
 from svg import SVG
 from bezier import *
+import sys
+import os
 
 
 class ComplexVector:
@@ -57,7 +59,7 @@ def animate(compVectors, xlim, ylim):
         ydata.append(y)
         line.set_data(xdata, ydata)
         return line, *vecs
-    ani = FuncAnimation(fig, update, frames=range(5000), interval=1, repeat=True, blit=True)
+    ani = FuncAnimation(fig, update, interval=1, repeat=True, blit=True)
     plt.show()
 
 def frame(compVectors, t):
@@ -75,21 +77,54 @@ def frame(compVectors, t):
     plt.show()
 
 
-if __name__ == "__main__":
-    with open("/Users/kohkihatori/NEA/API/pictures/nike.svg", "r") as f:
-        file = f.read()
-    tes = SVG(file)
-    poly = PolyBezier(tes.parse_path())
-    vdict = {x: poly.func(x) for x in np.arange(0, 1 + DT, DT)}
-    func = Function(vdict)
-    coeffs = func.get_coefficients()
-
-    index = len(coeffs)//2 - (len(coeffs) % 2 == 0)
+def create_compVectors(coefficients):
+    index = len(coefficients)//2 - (len(coefficients) % 2 == 0)
     steps = []
-    for i in range(len(coeffs)):
+    for i in range(len(coefficients)):
         steps.append(index)
         index += (-1) ** (i % 2 != 0) * (i + 1)
-    compVectors = [ComplexVector(coeffs[list(coeffs.keys())[i]], list(coeffs.keys())[i]) for i in steps]
+    compVectors = [ComplexVector(coefficients[list(coefficients.keys())[i]], list(coefficients.keys())[i]) for i in steps]
+    return compVectors
 
+
+def potrace(pnm_path):
+    filename = get_filename(file_path)
+    svg = f"{filename}.svg"
+    os.system(f"potrace --flat {pnm_path} -s -o {svg}")
+    return f"{get_filename(pnm_path)}.svg"
+
+
+def convert_to_pnm(file_path):
+    filename = get_filename(file_path)
+    pnm = f"{filename}.pnm"
+    os.system(f"convert {file_path} {pnm}")
+    return pnm
+
+def delete_pnm(file_path):
+    os.remove(file_path)
+
+def convert_to_svg(file_path):
+    pnm = convert_to_pnm(file_path)
+    svg = potrace(pnm)
+    delete_pnm(pnm)
+    return svg
+
+
+def main(file_path):
+    if get_extension(file_path) != "svg":
+        file_path = convert_to_svg(file_path)
+    file = get_file_content(file_path)
+    tes = SVG(file)
+    poly = PolyBezier(tes.parse_path())
+    vdict = {t: poly.func(t) for t in np.arange(0, 1 + DT, DT)}
+    func = Function(vdict)
+    coeffs = func.get_coefficients()
+    compVectors = create_compVectors(coeffs)
     animate(compVectors, func.xlim, func.ylim)
 
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print('Usage: python test_display.py "svg file name" ')
+    file_name = sys.argv[1]
+    file_path = os.path.abspath(file_name)
+    main(file_path)

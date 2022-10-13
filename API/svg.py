@@ -18,59 +18,68 @@ class SVG:
         return in_coordinates
 
     def parse_path(self):
-        current_point = np.array([0, 0])
-        initial_point = np.array([0, 0])
-        relative_coordinates = False
-        l_not_c = False
-        funcs = []
-        points_list = []
+        self.current_point = np.array([0, 0])
+        self.initial_point = np.array([0, 0])
+        self.relative_coordinates = False
+        self.l_not_c = False
+        self.funcs = []
+        self.points_list = []
         for index, point in enumerate(self.path):
             has_letter = re.search("[a-zA-z]", point)
             if has_letter:
                 letter = point[has_letter.start():has_letter.end()]
-                point_in_int = convert_coordinates_to_int(pop_char(point, has_letter.start()))
+                self.point_in_int = convert_coordinates_to_int(pop_char(point, has_letter.start()))
                 if letter.upper() != "Z":
-                    relative_coordinates = letter.islower()
+                    self.relative_coordinates = letter.islower()
                 match letter:
                     case "M" | "m":
-                        current_point = relative_coordinates * current_point + point_in_int
-                        if index == 0:
-                            initial_point = current_point
+                        self._process_m(index)
                     case "C" | "c":
-                        l_not_c = False
-                        points_list = [current_point, relative_coordinates * current_point + point_in_int]
+                        self._process_c()
                     case "L" | "l":
-                        l_not_c = True
-                        new_point = relative_coordinates * current_point + point_in_int
-                        funcs.append(Bezier(current_point, [], new_point))
-                        current_point = new_point
+                        self._process_l()
                     case "z":
-                        if l_not_c:
-                            new_point = relative_coordinates * current_point + point_in_int
-                            funcs.append(Bezier(current_point, [], new_point))
-                            current_point = new_point
-                        else:
-                            new_point = relative_coordinates * current_point + point_in_int
-                            points_list.append(new_point)
-                            if len(points_list) == 4:
-                                current_point = new_point
-                                funcs.append(Bezier(points_list[0], points_list[1:-1], points_list[-1]))
-                                points_list = []
-                        funcs.append(Bezier(current_point, [], initial_point))
+                        self._process_z()
+                    case _:
+                        raise SyntaxError("incorrect SVG syntax")
             else:
-                point_in_int = convert_coordinates_to_int(point)
-                if l_not_c:
-                    new_point = relative_coordinates * current_point + point_in_int
-                    funcs.append(Bezier(current_point, [], new_point))
-                    current_point = new_point
-                else:
-                    new_point = relative_coordinates * current_point + point_in_int
-                    points_list.append(new_point)
-                    if len(points_list) == 4:
-                        current_point = new_point
-                        funcs.append(Bezier(points_list[0], points_list[1:-1], points_list[-1]))
-                        points_list = [current_point]
-        return funcs
+                self.point_in_int = convert_coordinates_to_int(point)
+                self._process_coordinates()
+        return self.funcs
+
+    def _process_coordinates(self):
+        if self.l_not_c:
+            new_point = self.relative_coordinates * self.current_point + self.point_in_int
+            self.funcs.append(Bezier([self.current_point, new_point]))
+            self.current_point = new_point
+        else:
+            new_point = self.relative_coordinates * self.current_point + self.point_in_int
+            self.points_list.append(new_point)
+            if len(self.points_list) == 4:
+                self.current_point = new_point
+                self.funcs.append(Bezier(self.points_list))
+                self.points_list = [self.current_point]
+
+    def _process_m(self, index):
+        self.current_point = self.relative_coordinates * self.current_point + self.point_in_int
+        if index == 0:
+            self.initial_point = self.current_point
+
+    def _process_c(self):
+        self.l_not_c = False
+        new_point = self.relative_coordinates * self.current_point + self.point_in_int
+        self.points_list = [self.current_point, new_point]
+
+    def _process_l(self):
+        self.l_not_c = True
+        new_point = self.relative_coordinates * self.current_point + self.point_in_int
+        self.funcs.append(Bezier([self.current_point, new_point]))
+        self.current_point = new_point
+
+    def _process_z(self):
+        self._process_coordinates()
+        self.funcs.append(Bezier([self.current_point, self.initial_point]))
+        self.current_point = self.initial_point
 
 
 if __name__ == "__main__":

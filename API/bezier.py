@@ -3,10 +3,8 @@ from utils import *
 
 class Bezier:
 
-    def __init__(self, starting_point, control_points: list, end_point):
-        self.sp = starting_point
-        self.cps = control_points
-        self.ep = end_point
+    def __init__(self, points: list):
+        self.points = points
 
     def de_Casteljau(self, points: list, t: int):
         if len(points) == 1:
@@ -30,5 +28,4 @@ class PolyBezier:
         if index == self.num:
             index -= 1
         bez = self.beziers[index]
-        points = [bez.sp] + bez.cps + [bez.ep]
-        return bez.de_Casteljau(points, t * self.num - index)
+        return bez.de_Casteljau(bez.points, t * self.num - index)

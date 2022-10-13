@@ -5,6 +5,12 @@ def get_filename(file_name: str):
     return file_name.split(".")[0]
 
 
+def get_file_content(file_path):
+    with open(file_path, "r") as f:
+        file = f.read()
+    return file
+
+
 def get_extension(file_name: str):
     return file_name.split(".")[-1]
 
