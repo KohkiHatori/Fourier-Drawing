@@ -1,9 +1,16 @@
-from config import *
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.colors import LinearSegmentedColormap
 from function import Function
 from svg import SVG
 from bezier import *
 import sys
 import os
+from math import e
+from math import pi
+import math
+import numpy as np
+
 
 
 class ComplexVector:
@@ -12,11 +19,14 @@ class ComplexVector:
         self.coefficient = coefficient
         self.n = n
 
-    def func(self, t):
-        return self.coefficient * (E ** (self.n * 2 * PI * 1j * t))
+    def func(self, t) -> float:
+        return self.coefficient * (e ** (self.n * 2 * pi * 1j * t))
+
+    def __repr__(self) -> str:
+        pass
 
 
-def sum_comp_vec(vectors, t):
+def sum_comp_vec(vectors, t) -> int | float:
     sum = 0
     for vector in vectors:
         sum += vector.func(t)
@@ -35,18 +45,21 @@ def create_vec_data(compVectors, t):
     return data, origin
 
 def animate(compVectors, xlim, ylim):
+    # number of frames.
+    num = 1000
     plt.style.use('dark_background')
     fig = plt.figure(figsize=(19,10))
     x_range = xlim[1] - xlim[0]
     y_range = ylim[1] - ylim[0]
     ax = plt.axes(xlim=(xlim[0]-x_range/7, xlim[1]+x_range/7), ylim=(ylim[0]-y_range/7, ylim[1]+y_range/7))
     plt.gca().set_aspect('equal', adjustable='box')
-    line, = plt.plot([], [], lw=2)
     xdata = []
     ydata = []
+    line, = plt.plot([], [], lw=2)
+    colors = []
     vecs = [plt.plot([], [], linewidth=0.5)[0] for _ in range(len(compVectors))]
     def update(i):
-        t = i*0.001
+        t = i*(1/num)
         x = 0
         y = 0
         for vector, plot in zip(compVectors, vecs):
@@ -59,7 +72,9 @@ def animate(compVectors, xlim, ylim):
         ydata.append(y)
         line.set_data(xdata, ydata)
         return line, *vecs
-    ani = FuncAnimation(fig, update, interval=1, repeat=True, blit=True)
+    ani = animation.FuncAnimation(fig, update, frames=num, interval=1, repeat=True, blit=True)
+    # writervideo = animation.FFMpegWriter(fps=60)
+    # ani.save('test.mp4', writer=writervideo)
     plt.show()
 
 def frame(compVectors, t):
@@ -100,8 +115,10 @@ def convert_to_pnm(file_path):
     os.system(f"convert {file_path} {pnm}")
     return pnm
 
+
 def delete_pnm(file_path):
     os.remove(file_path)
+
 
 def convert_to_svg(file_path):
     pnm = convert_to_pnm(file_path)
@@ -111,14 +128,17 @@ def convert_to_svg(file_path):
 
 
 def main(file_path):
+    # Convert to svg
     if get_extension(file_path) != "svg":
         file_path = convert_to_svg(file_path)
+    # Get polybezier from the svg file
     file = get_file_content(file_path)
     tes = SVG(file)
     poly = PolyBezier(tes.parse_path())
-    vdict = {t: poly.func(t) for t in np.arange(0, 1 + DT, DT)}
-    func = Function(vdict)
+    # Get coefficients from the polybezier
+    func = Function(poly.func)
     coeffs = func.get_coefficients()
+    # Create compVector objects
     compVectors = create_compVectors(coeffs)
     animate(compVectors, func.xlim, func.ylim)
 
@@ -126,5 +146,8 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print('Usage: python test_display.py "svg file name" ')
     file_name = sys.argv[1]
-    file_path = os.path.abspath(file_name)
+    if file_name == "sample":
+        file_path = os.path.abspath("example_pictures/pi.svg")
+    else:
+        file_path = os.path.abspath(file_name)
     main(file_path)

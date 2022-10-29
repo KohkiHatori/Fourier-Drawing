@@ -1,4 +1,6 @@
-from config import *
+from math import e
+from math import pi
+import numpy as np
 
 
 class Function:
@@ -6,8 +8,13 @@ class Function:
 
     """
 
-    def __init__(self, value_dict):
-        self.value_dict = value_dict
+    # The step of t. t goes from 0 to 1, so the number of steps is the reciprocal of DT.
+    DT = 0.0001
+    # The number of rotating vectors used in the drawing
+    NUM = 100
+
+    def __init__(self, function):
+        self.func = function
         self.xlim, self.ylim = self.get_lims()
 
     def get_coefficient(self, n):
@@ -16,7 +23,7 @@ class Function:
         :param n: The frequency of the rotaing vector
         :return: The coefficient
         """
-        steps = np.arange(0, 1+DT, DT)
+        steps = np.arange(0, 1 + self.DT, self.DT)
         coefficient = sum(self.shifted_func(self, n, steps))
         return coefficient
 
@@ -25,23 +32,14 @@ class Function:
         This function gets a coefficient for each vector.
         :return: A dictionary with keys "steps" and values "coeffs"
         """
-        start = -round(NUM/2 - 1)
+        start = -round(self.NUM/2 - 1)
         # The middle value of frequency should be 0, so the minimum frequency is "start"
         # e.g. If the NUM is 10, the minimum frequency is -4.
         coeffs = []
-        steps = np.arange(start, start+NUM)
+        steps = np.arange(start, start + self.NUM)
         for n in steps:
             coeffs.append(self.get_coefficient(n))
         return dict(zip(steps, coeffs))
-
-    def func(self, t):
-        """
-        This function acts exactly the same as the original function.
-        The purpose of this function is to refer to the self.value_dict dictionary
-        :param t: The variable t.
-        :return: The value of the function at the input t.
-        """
-        return self.value_dict[t]
 
     @np.vectorize
     def shifted_func(self, n, t):
@@ -51,29 +49,23 @@ class Function:
         :param t:
         :return:
         """
-        return self.func(t) * E**(-n*2*PI*1j*t) * DT
+        return self.func(t) * e**(-n*2*pi*1j*t) * self.DT
 
     def get_lims(self):
         """
         :return: The maximum and minimum values of real and imaginary values.
         """
-        vals = self.value_dict.values()
+        value_dict = {t:self.func(t) for t in np.arange(0, 1+self.DT, self.DT)}
+        vals = value_dict.values()
         real = [val.real for val in vals]
         imag = [val.imag for val in vals]
         xlim = (min(real), max(real))
         ylim = (min(imag), max(imag))
         return xlim, ylim
 
+    def __repr__(self) -> str:
+        pass
 
-def function_sampler(function):
-    pass
 
-
-if __name__ == "__main__":
-    myfunc = lambda x: complex(math.cos(2*PI*x), (math.sin(2*PI*x)))
-    values = [myfunc(x) for x in np.arange(0, 1+DT, DT)]
-    vdict = dict(zip(np.arange(0, 1+DT, DT), values))
-    func = Function(vdict)
-    coeffs = func.get_coefficients()
 
 

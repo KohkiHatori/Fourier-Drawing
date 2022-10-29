@@ -1,6 +1,5 @@
 import cv2
 import sys
-import numpy as np
 from utils import *
 from datetime import datetime
 
@@ -21,14 +20,17 @@ class CannyOperator:
         #cv2.imwrite(f"pictures/{datetime.now()}.png", self.edges)
         drawing_img = np.zeros_like(self.edges)
         cv2.drawContours(drawing_img, self.contours, 0, (255), 1)
-        cv2.imwrite(f"pictures/{datetime.now()}.png", drawing_img)
+        cv2.imwrite(f"pictures/test.png", drawing_img)
 
     def main(self):
         self.detect_edge()
+        self.save()
         return self.edges
 
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        raise Exception("Usage: python canny_operator.py image_file")
     name = sys.argv[1]
     img_d = cv2.imread(name)
     edge = CannyOperator(img_d)

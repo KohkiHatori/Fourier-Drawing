@@ -1,4 +1,4 @@
-from config import *
+import numpy as np
 
 
 def get_filename(file_name: str):
@@ -19,7 +19,7 @@ def convert_coordinates_to_int(coordinates_in_string: str):
     return np.array(list(map(float, (coordinates_in_string.split()))))
 
 
-def pop_char(string: str, pos):
+def pop_char(string: str, pos) -> str:
     li = list(string)
     li.pop(pos)
     return "".join(li)
@@ -34,3 +34,8 @@ def lerp(p0, p1, t):
     :return:
     """
     return (1 - t) * p0 + t * p1
+
+
+
+if __name__ == "__main__":
+    print(get_filename("2022-10-18 16/26/40.864833.png"))
