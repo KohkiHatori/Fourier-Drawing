@@ -44,7 +44,7 @@ def create_vec_data(compVectors, t):
     origin = origin.cumsum(axis=1)
     return data, origin
 
-def animate(compVectors, xlim, ylim):
+def animate(compVectors, xlim, ylim, output=False):
     # number of frames.
     num = 1000
     plt.style.use('dark_background')
@@ -73,8 +73,9 @@ def animate(compVectors, xlim, ylim):
         line.set_data(xdata, ydata)
         return line, *vecs
     ani = animation.FuncAnimation(fig, update, frames=num, interval=1, repeat=True, blit=True)
-    # writervideo = animation.FFMpegWriter(fps=60)
-    # ani.save('test.mp4', writer=writervideo)
+    if output:
+        writervideo = animation.FFMpegWriter(fps=60)
+        ani.save('test.mp4', writer=writervideo)
     plt.show()
 
 def frame(compVectors, t):
@@ -127,7 +128,7 @@ def convert_to_svg(file_path):
     return svg
 
 
-def main(file_path):
+def main(file_path, output):
     # Convert to svg
     if get_extension(file_path) != "svg":
         file_path = convert_to_svg(file_path)
@@ -140,14 +141,16 @@ def main(file_path):
     coeffs = func.get_coefficients()
     # Create compVector objects
     compVectors = create_compVectors(coeffs)
-    animate(compVectors, func.xlim, func.ylim)
+    animate(compVectors, func.xlim, func.ylim, output)
+
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print('Usage: python test_display.py "svg file name" ')
-    file_name = sys.argv[1]
-    if file_name == "sample":
-        file_path = os.path.abspath("example_pictures/pi.svg")
     else:
-        file_path = os.path.abspath(file_name)
-    main(file_path)
+        file_name = sys.argv[1]
+        if file_name == "sample":
+            file_path = os.path.abspath("example_pictures/pi.svg")
+        else:
+            file_path = os.path.abspath(file_name)
+        main(file_path, sys.argv[2]=="output")
