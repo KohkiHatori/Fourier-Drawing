@@ -23,7 +23,7 @@ class SVG:
         self.relative_coordinates = False
         self.l_not_c = False
         self.points_list = []
-        for index, point in enumerate(self.path):
+        for point in self.path:
             has_letter = re.search("[a-zA-z]", point)
             if has_letter:
                 letter = point[has_letter.start():has_letter.end()]
@@ -32,7 +32,7 @@ class SVG:
                     self.relative_coordinates = letter.islower()
                 match letter:
                     case "M" | "m":
-                        self._process_m(index)
+                        self._process_m()
                     case "C" | "c":
                         self._process_c()
                     case "L" | "l":
@@ -65,10 +65,14 @@ class SVG:
             self.funcs.append(Bezier(self.points_list))
             self.points_list = [self.current_point]
 
-    def _process_m(self, index) -> None:
+    def _process_m(self) -> None:
         self.current_point = self.relative_coordinates * self.current_point + self.point_in_int
-        if index == 0:
-            self.initial_point = self.current_point
+        # If there are already Bezier curves in self.funcs, rearrange it so that the pen tip doesn't have to "jump" a
+        # long distance
+        if len(self.funcs) > 0:
+            shortest = self._get_shortest()
+            self.rearrange(shortest)
+        self.initial_point = self.current_point
 
     def _process_c(self) -> None:
         self.l_not_c = False
@@ -85,6 +89,17 @@ class SVG:
         self._process_coordinates()
         self.funcs.append(Bezier([self.current_point, self.initial_point]))
         self.current_point = self.initial_point
+
+    def _get_shortest(self):
+        dists = []
+        for bez in self.funcs:
+            point = bez.points[-1]
+            dists.append(two_d_dist(self.current_point, point))
+        return dists.index(min(dists))
+
+    def rearrange(self, shortest):
+        self.funcs = self.funcs[shortest+1:] + self.funcs[:shortest+1]
+
 
 #    def __repr__(self) -> str:
 #        return f""

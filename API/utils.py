@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 
@@ -37,7 +39,7 @@ def lerp(p0, p1, t):
 
 
 def two_d_dist(p1, p2):
-    pass
+    return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
 if __name__ == "__main__":
     print(get_filename("2022-10-18 16/26/40.864833.png"))

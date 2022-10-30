@@ -146,7 +146,7 @@ def main(file_path, output=False):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print('Usage: python test_display.py "svg file name" ')
+        print('Usage: python test_display.py "image file name" ')
     else:
         file_name = sys.argv[1]
         if file_name == "sample":
