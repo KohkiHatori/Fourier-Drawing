@@ -2,6 +2,7 @@
 
 ## Example
 
+<img src="https://user-images.githubusercontent.com/79348782/198857561-531d9705-e81f-4219-a8e2-4f63ab1243f0.png" width=300>
 
 https://user-images.githubusercontent.com/79348782/198857486-7f2923c9-e0df-4b5f-88fb-fcdb99626c29.mp4
 
