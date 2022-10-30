@@ -128,7 +128,7 @@ def convert_to_svg(file_path):
     return svg
 
 
-def main(file_path, output):
+def main(file_path, output=False):
     # Convert to svg
     if get_extension(file_path) != "svg":
         file_path = convert_to_svg(file_path)
