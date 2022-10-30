@@ -86,9 +86,8 @@ class SVG:
         self.funcs.append(Bezier([self.current_point, self.initial_point]))
         self.current_point = self.initial_point
 
-    def __repr__(self) -> str:
-
-        return f""
+#    def __repr__(self) -> str:
+#        return f""
 
 
 if __name__ == "__main__":

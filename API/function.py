@@ -63,8 +63,8 @@ class Function:
         ylim = (min(imag), max(imag))
         return xlim, ylim
 
-    def __repr__(self) -> str:
-        pass
+#    def __repr__(self) -> str:
+#        pass
 
 
 

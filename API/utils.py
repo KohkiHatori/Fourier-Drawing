@@ -36,6 +36,8 @@ def lerp(p0, p1, t):
     return (1 - t) * p0 + t * p1
 
 
+def two_d_dist(p1, p2):
+    pass
 
 if __name__ == "__main__":
     print(get_filename("2022-10-18 16/26/40.864833.png"))
