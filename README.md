@@ -9,13 +9,20 @@ https://user-images.githubusercontent.com/79348782/198857486-7f2923c9-e0df-4b5f-
 
 
 ## Dependencies
-1. ImageMagick
+### 1. ImageMagick
 Download and install instructions: 
 http://www.imagemagick.org/script/convert.php
 
-2. Potrace
+### 2. Potrace
 Download and install instructions: 
 https://potrace.sourceforge.net/
+
+### 3. Python Packages
+Execute the following from the command line.
+```
+cd API
+pip install -r requirements.txt
+```
 
 ## How to run
 ```
