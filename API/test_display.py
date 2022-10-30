@@ -153,4 +153,7 @@ if __name__ == "__main__":
             file_path = os.path.abspath("example_pictures/pi.svg")
         else:
             file_path = os.path.abspath(file_name)
-        main(file_path, sys.argv[2]=="output")
+        if len(sys.argv) >= 3:
+            main(file_path, sys.argv[2] == "output")
+        else:
+            main(file_path)
