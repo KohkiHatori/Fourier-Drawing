@@ -18,8 +18,8 @@ class SVG:
         return in_coordinates
 
     def parse_path(self) -> list:
-        self.current_point = np.array([0, 0])
-        self.initial_point = np.array([0, 0])
+        self.current_point = complex(0, 0)
+        self.initial_point = complex(0, 0)
         self.relative_coordinates = False
         self.l_not_c = False
         self.points_list = []
@@ -37,7 +37,7 @@ class SVG:
                         self._process_c()
                     case "L" | "l":
                         self._process_l()
-                    case "z":
+                    case "z" | "Z":
                         self._process_z()
                     case _:
                         raise SyntaxError("incorrect SVG syntax")
@@ -48,16 +48,16 @@ class SVG:
 
     def _process_coordinates(self) -> None:
         if self.l_not_c:
-            self._process_coordinates_l()
+            self._process_coordinates_linear()
         else:
-            self._process_coordinates_c()
+            self._process_coordinates_cubic()
 
-    def _process_coordinates_l(self) -> None:
+    def _process_coordinates_linear(self) -> None:
         new_point = self.relative_coordinates * self.current_point + self.point_in_int
         self.funcs.append(Bezier([self.current_point, new_point]))
         self.current_point = new_point
 
-    def _process_coordinates_c(self) -> None:
+    def _process_coordinates_cubic(self) -> None:
         new_point = self.relative_coordinates * self.current_point + self.point_in_int
         self.points_list.append(new_point)
         if len(self.points_list) == 4:

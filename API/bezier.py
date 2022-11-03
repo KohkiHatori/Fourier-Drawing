@@ -34,8 +34,7 @@ class Bezier:
             point = lerp(points[0], points[1], t)
         else:
             raise Exception
-        in_complex_form = complex(point[0], point[1])
-        return in_complex_form
+        return point
 
     def cubic(self, points: list, t: int):
         return (1-t)**3 * points[0] + 3 * (1-t)**2 * t * points[1] + 3 * (1-t) * t**2 * points[2] + t**3 * points[3]

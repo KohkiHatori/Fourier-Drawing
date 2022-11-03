@@ -1,8 +1,5 @@
 import math
 
-import numpy as np
-
-
 def get_filename(file_name: str):
     return file_name.split(".")[0]
 
@@ -17,8 +14,13 @@ def get_extension(file_name: str):
     return file_name.split(".")[-1]
 
 
-def convert_coordinates_to_int(coordinates_in_string: str):
-    return np.array(list(map(float, (coordinates_in_string.split()))))
+def convert_coordinates_to_int(coordinates_in_string: str) -> complex:
+    points = list(map(float, (coordinates_in_string.split())))
+    if len(points) == 2:
+        coordinates = complex(points[0], points[1])
+    else:
+        raise SyntaxError("There should only be two coordinates")
+    return coordinates
 
 
 def pop_char(string: str, pos) -> str:
@@ -27,7 +29,7 @@ def pop_char(string: str, pos) -> str:
     return "".join(li)
 
 
-def lerp(p0, p1, t):
+def lerp(p0: complex, p1: complex, t: float):
     """
 
     :param p0:
@@ -38,8 +40,8 @@ def lerp(p0, p1, t):
     return (1 - t) * p0 + t * p1
 
 
-def two_d_dist(p1, p2):
-    return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+def two_d_dist(p1: complex, p2: complex) -> float:
+    return math.sqrt((p1.real-p2.real)**2 + (p1.real-p2.real)**2)
 
 if __name__ == "__main__":
     print(get_filename("2022-10-18 16/26/40.864833.png"))
