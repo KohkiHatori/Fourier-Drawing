@@ -17,6 +17,9 @@ class Function:
         self.func = function
         self.xlim, self.ylim = self.get_lims()
 
+    def coefficient_test(self, n):
+        pass
+
     def get_coefficient(self, n):
         """
         This function calculates the coefficient for a rotating vector with a frequency of n
@@ -47,7 +50,7 @@ class Function:
         This function is shifted in order to obtain the
         :param n:
         :param t:
-        :return:
+        :return
         """
         return self.func(t) * e**(-n*2*pi*1j*t) * self.DT
 

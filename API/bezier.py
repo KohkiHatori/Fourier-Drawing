@@ -61,8 +61,8 @@ class PolyBezier:
         if index == self.num:
             index -= 1
         bez = self.beziers[index]
-        return bez.de_Casteljau(bez.points, t * self.num - index)
-        #return bez.derived(bez.points, t * self.num - index)
+        #return bez.de_Casteljau(bez.points, t * self.num - index)
+        return bez.derived(bez.points, t * self.num - index)
 
     def __repr__(self) -> str:
         return f"PolyBezier object consisting of {self.num} bezier curves"

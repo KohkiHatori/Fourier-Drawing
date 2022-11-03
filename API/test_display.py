@@ -10,6 +10,7 @@ from math import e
 from math import pi
 import math
 import numpy as np
+from time import time
 
 
 
@@ -113,7 +114,7 @@ def potrace(pnm_path):
 def convert_to_pnm(file_path):
     filename = get_filename(file_path)
     pnm = f"{filename}.pnm"
-    os.system(f"convert {file_path} {pnm}")
+    os.system(f"convert {file_path} -background white -alpha remove -alpha off {pnm}")
     return pnm
 
 
@@ -129,6 +130,7 @@ def convert_to_svg(file_path):
 
 
 def main(file_path, output=False):
+    initial = time()
     # Convert to svg
     if get_extension(file_path) != "svg":
         file_path = convert_to_svg(file_path)
@@ -141,6 +143,8 @@ def main(file_path, output=False):
     coeffs = func.get_coefficients()
     # Create compVector objects
     compVectors = create_compVectors(coeffs)
+    final = time()
+    print(f"Time taken: {final-initial}")
     animate(compVectors, func.xlim, func.ylim, output)
 
 
