@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import LinearSegmentedColormap
 from function import Function
+from coeff import Coefficient_calculator
 from svg import SVG
 from bezier import *
 import sys
@@ -129,6 +130,10 @@ def convert_to_svg(file_path):
     return svg
 
 
+def coeff_saver(coeffs):
+    with open("coeffs.log", "a") as f:
+        f.write(str(coeffs)+"\n")
+
 def main(file_path, output=False):
     initial = time()
     # Convert to svg
@@ -139,18 +144,24 @@ def main(file_path, output=False):
     tes = SVG(file)
     poly = PolyBezier(tes.parse_path())
     # Get coefficients from the polybezier
+
+
     func = Function(poly.func)
     coeffs = func.get_coefficients()
+
+    coeff_saver(coeffs)
+
     # Create compVector objects
     compVectors = create_compVectors(coeffs)
     final = time()
     print(f"Time taken: {final-initial}")
-    animate(compVectors, func.xlim, func.ylim, output)
+    animate(compVectors, *poly.get_lims(), output)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print('Usage: python test_display.py "image file name" ')
+        main("/Users/kohkihatori/NEA/API/example_pictures/test.svg")
+        #print('Usage: python test_display.py "image file name" ')
     else:
         file_name = sys.argv[1]
         if file_name == "sample":

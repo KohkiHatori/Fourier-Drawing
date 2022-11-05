@@ -15,10 +15,6 @@ class Function:
 
     def __init__(self, function):
         self.func = function
-        self.xlim, self.ylim = self.get_lims()
-
-    def coefficient_test(self, n):
-        pass
 
     def get_coefficient(self, n):
         """
@@ -54,17 +50,6 @@ class Function:
         """
         return self.func(t) * e**(-n*2*pi*1j*t) * self.DT
 
-    def get_lims(self):
-        """
-        :return: The maximum and minimum values of real and imaginary values.
-        """
-        value_dict = {t:self.func(t) for t in np.arange(0, 1+self.DT, self.DT)}
-        vals = value_dict.values()
-        real = [val.real for val in vals]
-        imag = [val.imag for val in vals]
-        xlim = (min(real), max(real))
-        ylim = (min(imag), max(imag))
-        return xlim, ylim
 
 #    def __repr__(self) -> str:
 #        pass

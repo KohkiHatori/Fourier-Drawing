@@ -14,7 +14,7 @@ class SVG:
         path = re.findall("<path.*/>", self.content, flags=re.DOTALL)[0]
         with_space = re.sub(r"\n", " ", path)
         d = re.findall(r"\".*\"", with_space)[0][1:-1]
-        in_coordinates = re.findall(r"[a-zA-z]?-?\d+\.?\d*\s-?\d+\.?\d*z?", d)
+        in_coordinates = re.findall(r"[a-zA-Z]?-?\d+\.?\d*\s-?\d+\.?\d*z?", d)
         return in_coordinates
 
     def parse_path(self) -> list:
