@@ -5,11 +5,11 @@ import numpy as np
 class Bezier:
 
     degree = {
-        1: "Linear",
-        2: "Quadratic",
-        3: "Cubic",
-        4: "Quartic",
-        5: "Quintic"
+        2: "Linear",
+        3: "Quadratic",
+        4: "Cubic",
+        5: "Quartic",
+        6: "Quintic"
     }
 
     def __init__(self, points: list):
@@ -25,23 +25,18 @@ class Bezier:
                 new_points.append(lerp(points[i], points[i + 1], t))
             return self.de_Casteljau(new_points, t)
 
-    def derived(self, points: list, t: float):
-        length = len(points)
+    def derived(self, t: float):
+        length = len(self.points)
         if length == 4:
-            point = self.cubic(points, t)
-        elif length == 3:
-            point = self.quadratic(points, t)
+            point = self.cubic(t)
         elif length == 2:
-            point = lerp(points[0], points[1], t)
+            point = lerp(self.points[0], self.points[1], t)
         else:
             raise Exception
         return point
 
-    def cubic(self, points: list, t: float):
-        return (1-t)**3 * points[0] + 3 * (1-t)**2 * t * points[1] + 3 * (1-t) * t**2 * points[2] + t**3 * points[3]
-
-    def quadratic(self, points: list, t: float):
-        return (1-t) ** 2 * points[0] + 2 * (1-t) * t * points[1] + t**2 * points[2]
+    def cubic(self, t: float):
+        return (1-t)**3 * self.points[0] + 3 * (1-t)**2 * t * self.points[1] + 3 * (1-t) * t**2 * self.points[2] + t**3 * self.points[3]
 
     def get_lims(self):
         pass
@@ -52,6 +47,9 @@ class Bezier:
             out += f"Point{index+1}: ({point[0]}, {point[1]}) "
         return out
 
+class CubicBezier(Bezier):
+
+    pass
 
 class PolyBezier:
 
@@ -65,7 +63,7 @@ class PolyBezier:
             index -= 1
         bez = self.beziers[index]
         #return bez.de_Casteljau(bez.points, t * self.num - index)
-        return bez.derived(bez.points, t * self.num - index)
+        return bez.derived(t * self.num - index)
 
     def get_lims(self):
         """

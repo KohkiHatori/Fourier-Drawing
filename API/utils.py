@@ -41,4 +41,4 @@ def lerp(p0: complex, p1: complex, t: float):
 
 
 def two_d_dist(p1: complex, p2: complex) -> float:
-    return math.sqrt((p1.real-p2.real)**2 + (p1.real-p2.real)**2)
+    return math.sqrt((p1.real-p2.real)**2 + (p1.imag-p2.imag)**2)

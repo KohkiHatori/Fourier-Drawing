@@ -55,6 +55,7 @@ def animate(compVectors, xlim, ylim, output=False):
     y_range = ylim[1] - ylim[0]
     ax = plt.axes(xlim=(xlim[0]-x_range/7, xlim[1]+x_range/7), ylim=(ylim[0]-y_range/7, ylim[1]+y_range/7))
     plt.gca().set_aspect('equal', adjustable='box')
+    ax.axis("off")
     xdata = []
     ydata = []
     line, = plt.plot([], [], lw=2)
@@ -104,6 +105,7 @@ def create_compVectors(coefficients):
     compVectors = [ComplexVector(coefficients[list(coefficients.keys())[i]], list(coefficients.keys())[i]) for i in steps]
     return compVectors
 
+import os
 
 def potrace(pnm_path):
     filename = get_filename(file_path)
@@ -144,12 +146,10 @@ def main(file_path, output=False):
     tes = SVG(file)
     poly = PolyBezier(tes.parse_path())
     # Get coefficients from the polybezier
-
-
     func = Function(poly.func)
     coeffs = func.get_coefficients()
 
-    coeff_saver(coeffs)
+    #coeff_saver(coeffs)
 
     # Create compVector objects
     compVectors = create_compVectors(coeffs)
