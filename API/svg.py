@@ -74,8 +74,6 @@ class SVG:
         # If there are already Bezier curves in self.funcs, rearrange it so that the pen tip doesn't have to "jump" a
         # long distance
         if len(self.funcs_temp) > 0:
-            shortest = self._get_shortest()
-            self.rearrange(shortest)
             self.funcs.append(self.funcs_temp)
             self.funcs_temp = []
         self.initial_point = self.current_point
@@ -98,15 +96,6 @@ class SVG:
         self.funcs.append(self.funcs_temp)
         self.funcs_temp = []
 
-    def _get_shortest(self):
-        dists = []
-        for bez in self.funcs_temp:
-            point = bez.points[-1]
-            dists.append(two_d_dist(self.current_point, point))
-        return dists.index(min(dists))
-
-    def rearrange(self, shortest):
-        self.funcs_temp = self.funcs_temp[shortest+1:] + self.funcs_temp[:shortest+1]
 
 
 #    def __repr__(self) -> str:

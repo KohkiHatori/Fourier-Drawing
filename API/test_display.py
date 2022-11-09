@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from function import Function
 from coeff import Coefficient_calculator
 from svg import SVG
 from bezier import *
@@ -265,7 +264,7 @@ def main(file_path, output=False, num_set=0):
     sets_of_compVectors = get_sets_compVec(sets_of_coeffs)
     final = time()
     print(f"Time taken: {final-initial}")
-    animate(sets_of_compVectors, *get_lims(polybeziers), output=output, show_vectors=False)
+    animate(sets_of_compVectors, *get_lims(polybeziers), output=output, show_vectors=True)
 
 
 if __name__ == "__main__":
