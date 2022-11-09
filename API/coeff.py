@@ -6,46 +6,57 @@ class Coefficient_calculator:
 
     def __init__(self, poly_bezier, num):
         self.poly_bezier = poly_bezier
-        self.num = num
+        self.num_coeff = num
+        self.num_bez = len(self.poly_bezier)
 
     def get_coefficient(self, n):
         integrals = []
-        denom = -n * 2 * pi * 1j
-        num = len(self.poly_bezier)
+        self.denom = -n * 2 * pi * 1j
         for index, bezier in enumerate(self.poly_bezier.beziers):
-            upper = e ** (denom * index+1)
-            lower = e ** (denom * index)
+            self.upper = (index+1)/self.num_bez
+            self.lower = index/self.num_bez
+            self.upper_e = e ** (self.denom * self.upper)
+            self.lower_e = e ** (self.denom * self.lower)
             if len(bezier.points) == 4:
-                a = -bezier.points[0] + 3 * bezier.points[1] - 3 * bezier.points[2] + bezier.points[3]
-                b = 3 * bezier.points[0] - 6 * bezier.points[1] + 3 * bezier.points[2]
-                c = -3 * bezier.points[0] + 3 * bezier.points[1]
-                d = bezier.points[0]
-                if n == 0:
-                    result = a / 4 + b / 3 + c / 2 + d
-                else:
-                    first = ((a+b+c+d)*upper-d*lower)/denom
-                    second = - ((3*a+2*b+c)*upper-c*lower)/(denom**2)
-                    third = ((6*a+2*b)*upper-2*b*lower)/(denom**3)
-                    fourth = - (6*a*(upper-lower))/(denom**4)
-                    result = first + second + third + fourth
+                result = self._get_integral_cubic(bezier, n)
             elif len(bezier.points) == 2:
-                zero = bezier.points[0]
-                one = bezier.points[1]
-                if n == 0:
-                    result = zero + (one - zero) / 2
-                else:
-                    result = ((one*upper-zero*lower)/denom) - ((one-zero)*(upper+lower)/(denom**2))
+                result = self._get_integral_linear(bezier, n)
             else:
                 raise SyntaxError("Only cubic and linear bezier curves are supported.")
             integrals.append(result)
         return sum(integrals)
 
+    def _get_integral_cubic(self, bezier, n):
+        a = -bezier.points[0] + 3 * bezier.points[1] - 3 * bezier.points[2] + bezier.points[3]
+        b = 3 * bezier.points[0] - 6 * bezier.points[1] + 3 * bezier.points[2]
+        c = -3 * bezier.points[0] + 3 * bezier.points[1]
+        d = bezier.points[0]
+        if n == 0:
+            result = (a / 4 + b / 3 + c / 2 + d) / self.num_bez
+        else:
+            first = ((a + b + c + d) * self.upper_e - d * self.lower_e) / self.denom
+            second = -(self.num_bez * ((3 * a + 2 * b + c) * self.upper_e - c * self.lower_e) / (self.denom ** 2))
+            third = (self.num_bez ** 2 * ((6 * a + 2 * b) * self.upper_e - 2 * b * self.lower_e)) / (self.denom ** 3)
+            fourth = -((self.num_bez ** 3 * 6*a * (self.upper_e - self.lower_e)) / (self.denom ** 4))
+            result = first + second + third + fourth
+        return result
+
+    def _get_integral_linear(self, bezier, n):
+        zero = bezier.points[0]
+        one = bezier.points[1]
+        if n == 0:
+            result = ((zero + (one - zero) / 2) / self.num_bez)
+        else:
+            result = ((one * self.upper_e - zero * self.lower_e) / self.denom) - (self.num_bez * (one - zero) * (
+                    self.upper_e - self.lower_e) / (self.denom ** 2))
+        return result
+
     def main(self):
-        start = -round(self.num/2 - 1)
+        start = -round(self.num_coeff / 2 - 1)
         # The middle value of frequency should be 0, so the minimum frequency is "start"
         # e.g. If the NUM is 10, the minimum frequency is -4.
         coeffs = []
-        steps = np.arange(start, start + self.num)
+        steps = np.arange(start, start + self.num_coeff)
         for n in steps:
             coeffs.append(self.get_coefficient(n))
         return dict(zip(steps, coeffs))

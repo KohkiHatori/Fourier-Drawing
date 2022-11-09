@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from function import Function
+from coeff import Coefficient_calculator
 from svg import SVG
 from bezier import *
 import sys
@@ -58,9 +59,9 @@ def sum_comp_vec(vectors, t) -> int | float:
 
 
 
-def animate(sets, xlim, ylim, output=False):
+def animate(sets, xlim, ylim, output=False, show_vectors=True):
     # number of frames.
-    num = 500
+    num = 1000
     plt.style.use('dark_background')
     fig = plt.figure(figsize=(19,10))
     x_range = xlim[1] - xlim[0]
@@ -69,24 +70,39 @@ def animate(sets, xlim, ylim, output=False):
     plt.gca().set_aspect('equal', adjustable='box')
     ax.axis("off")
     lines = [plt.plot([], [], lw=PATH_WIDTH, color="c")[0] for _ in range(len(sets))]
-    sets_of_vecs = [[plt.plot([], [], linewidth=VEC_WIDTH)[0] for _ in range(len(compVectors))]for compVectors in sets]
+    if show_vectors:
+        sets_of_vecs = [[plt.plot([], [], linewidth=VEC_WIDTH)[0] for _ in range(len(compVectors))]for compVectors in sets]
     xdatas = [[] for _ in range(len(sets))]
     ydatas = [[] for _ in range(len(sets))]
     def update(i):
         t = i*(1/num)
-        for compVectors, line, vecs, xdata, ydata in zip(sets, lines, sets_of_vecs, xdatas, ydatas):
-            x = 0
-            y = 0
-            for vector, plot in zip(compVectors, vecs):
-                x_updated = x + vector.func(t).real
-                y_updated = y + vector.func(t).imag
-                plot.set_data([x, x_updated], [y, y_updated])
-                x = x_updated
-                y = y_updated
-            xdata.append(x)
-            ydata.append(y)
-            line.set_data(xdata, ydata)
-        return *lines, *chain.from_iterable(sets_of_vecs)
+        if show_vectors:
+            for compVectors, line, vecs, xdata, ydata in zip(sets, lines, sets_of_vecs, xdatas, ydatas):
+                x = 0
+                y = 0
+                for vector, plot in zip(compVectors, vecs):
+                    x_updated = x + vector.func(t).real
+                    y_updated = y + vector.func(t).imag
+                    plot.set_data([x, x_updated], [y, y_updated])
+                    x = x_updated
+                    y = y_updated
+                xdata.append(x)
+                ydata.append(y)
+                line.set_data(xdata, ydata)
+            return *lines, *chain.from_iterable(sets_of_vecs)
+        else:
+            for compVectors, line, xdata, ydata in zip(sets, lines, xdatas, ydatas):
+                x = 0
+                y = 0
+                for vector in compVectors:
+                    x_updated = x + vector.func(t).real
+                    y_updated = y + vector.func(t).imag
+                    x = x_updated
+                    y = y_updated
+                xdata.append(x)
+                ydata.append(y)
+                line.set_data(xdata, ydata)
+            return *lines,
     ani = animation.FuncAnimation(fig, update, frames=num, interval=1, repeat=True, blit=True)
     if output:
         writervideo = animation.FFMpegWriter(fps=60)
@@ -140,11 +156,13 @@ def create_polybeziers(paths):
         polys.append(poly)
     return polys
 
-def get_sets_coeffs(polys):
+def get_sets_coeffs(polys, num):
     sets_of_coeffs = []
     for poly in polys:
-        func = Function(poly.func)
-        sets_of_coeffs.append(func.get_coefficients())
+        calc = Coefficient_calculator(poly, num)
+        sets_of_coeffs.append(calc.main())
+        #func = Function(poly.func)
+        #sets_of_coeffs.append(func.get_coefficients())
     return sets_of_coeffs
 
 def get_sets_compVec(sets_of_coeffs):
@@ -155,7 +173,7 @@ def get_sets_compVec(sets_of_coeffs):
 
 def merge(paths, num_set):
     num_edge = len(paths)
-    if 1 <= num_set <= num_edge:
+    if 0 < num_set < num_edge:
         num_merge = num_edge - num_set
         dists = {}
         for i in range(num_edge):
@@ -169,7 +187,7 @@ def merge(paths, num_set):
         merge_indices = [x for x, _ in sorted(dists.items(), key=lambda item: item[1])][:num_merge]
         paths = rearrange(paths, merge_indices)
         return paths
-    elif num_set == 0:
+    elif num_set == 0 or num_edge == num_set:
         return paths
     else:
         raise IndexError("num_set must be between 1 and the number of edges")
@@ -239,15 +257,15 @@ def main(file_path, output=False, num_set=0):
     file = get_file_content(file_path)
     svg = SVG(file)
     paths = svg.parse_path()
-    paths = merge(paths, num_set=3)
+    paths = merge(paths, num_set)
     polybeziers = create_polybeziers(paths)
-    sets_of_coeffs = get_sets_coeffs(polybeziers)
+    sets_of_coeffs = get_sets_coeffs(polybeziers, 100)
     #coeff_saver(coeffs)
     # Create compVector objects
     sets_of_compVectors = get_sets_compVec(sets_of_coeffs)
     final = time()
     print(f"Time taken: {final-initial}")
-    animate(sets_of_compVectors, *get_lims(polybeziers), output=output)
+    animate(sets_of_compVectors, *get_lims(polybeziers), output=output, show_vectors=False)
 
 
 if __name__ == "__main__":
