@@ -44,7 +44,7 @@ class Bezier:
     def __repr__(self) -> str:
         out = f"{self.degree[len(self.points)]} Bezier Curve: "
         for index, point in enumerate(self.points):
-            out += f"Point{index+1}: ({point[0]}, {point[1]}) "
+            out += f"Point{index+1}: ({point.real}, {point.imag}) "
         return out
 
 class CubicBezier(Bezier):
@@ -60,8 +60,9 @@ class PolyBezier:
     def func(self, t: float) -> complex:
         index = int(t // (1 / self.num))
         if index == self.num:
-            index -= 1
-        bez = self.beziers[index]
+            bez = self.beziers[index-1]
+        else:
+            bez = self.beziers[index]
         #return bez.de_Casteljau(bez.points, t * self.num - index)
         return bez.derived(t * self.num - index)
 
