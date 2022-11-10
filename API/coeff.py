@@ -17,9 +17,9 @@ class Coefficient_calculator:
             self.lower = index/self.num_bez
             self.upper_e = e ** (self.denom * self.upper)
             self.lower_e = e ** (self.denom * self.lower)
-            if len(bezier.points) == 4:
+            if bezier.degree == 3:
                 result = self._get_integral_cubic(bezier, n)
-            elif len(bezier.points) == 2:
+            elif bezier.degree == 1:
                 result = self._get_integral_linear(bezier, n)
             else:
                 raise SyntaxError("Only cubic and linear bezier curves are supported.")
@@ -27,10 +27,10 @@ class Coefficient_calculator:
         return sum(integrals)
 
     def _get_integral_cubic(self, bezier, n):
-        a = -bezier.points[0] + 3 * bezier.points[1] - 3 * bezier.points[2] + bezier.points[3]
-        b = 3 * bezier.points[0] - 6 * bezier.points[1] + 3 * bezier.points[2]
-        c = -3 * bezier.points[0] + 3 * bezier.points[1]
-        d = bezier.points[0]
+        a = -bezier.p(0) + 3 * bezier.p(1) - 3 * bezier.p(2) + bezier.p(3)
+        b = 3 * bezier.p(0) - 6 * bezier.p(1) + 3 * bezier.p(2)
+        c = -3 * bezier.p(0) + 3 * bezier.p(1)
+        d = bezier.p(0)
         if n == 0:
             result = (a / 4 + b / 3 + c / 2 + d) / self.num_bez
         else:
@@ -42,8 +42,8 @@ class Coefficient_calculator:
         return result
 
     def _get_integral_linear(self, bezier, n):
-        zero = bezier.points[0]
-        one = bezier.points[1]
+        zero = bezier.p(0)
+        one = bezier.p(1)
         if n == 0:
             result = ((zero + (one - zero) / 2) / self.num_bez)
         else:

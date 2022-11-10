@@ -1,55 +1,81 @@
 from utils import *
-import numpy as np
 
 
 class Bezier:
 
-    degree = {
-        2: "Linear",
-        3: "Quadratic",
-        4: "Cubic",
-        5: "Quartic",
-        6: "Quintic"
+    degrees = {
+        1: "Linear",
+        2: "Quadratic",
+        3: "Cubic",
+        4: "Quartic",
+        5: "Quintic",
     }
 
-    def __init__(self, points: list):
+    def __init__(self, points):
+        self.degree = None
         self.points = points
 
-    def de_Casteljau(self, points: list, t: float):
-        if len(points) == 1:
-            in_complex_form = complex(points[0][0], points[0][1])
-            return in_complex_form
-        else:
-            new_points = []
-            for i in range(len(points) - 1):
-                new_points.append(lerp(points[i], points[i + 1], t))
-            return self.de_Casteljau(new_points, t)
-
-    def derived(self, t: float):
-        length = len(self.points)
-        if length == 4:
-            point = self.cubic(t)
-        elif length == 2:
-            point = lerp(self.points[0], self.points[1], t)
-        else:
-            raise Exception
-        return point
-
-    def cubic(self, t: float):
-        return (1-t)**3 * self.points[0] + 3 * (1-t)**2 * t * self.points[1] + 3 * (1-t) * t**2 * self.points[2] + t**3 * self.points[3]
-
-    def get_lims(self):
-        pass
+    def p(self, i: int):
+        return self.points[i]
 
     def __repr__(self) -> str:
-        out = f"{self.degree[len(self.points)]} Bezier Curve: "
+        out = f"{self.degrees[self.degree]} Bezier Curve: "
         for index, point in enumerate(self.points):
-            out += f"Point{index+1}: ({point.real}, {point.imag}) "
+            out += f"Point{index + 1}: ({point.real}, {point.imag}) "
         return out
+
+
 
 class CubicBezier(Bezier):
 
-    pass
+    def __init__(self, points):
+        super().__init__(points)
+        self.degree = 3
+
+    def func(self, t: float):
+        return (1 - t) ** 3 * self.p(0) + 3 * (1 - t) ** 2 * t * self.p(1) + 3 * (1 - t) * t ** 2 * self.p(2) + t ** 3 * self.p(3)
+
+    def get_lims(self):
+        possible_maxima_minima = [self.p(0), self.p(1), *self._get_solutions_to_derivatives()]
+        coordinates = {point.real: point.imag for point in possible_maxima_minima}
+        xs = list(coordinates.keys())
+        ys = list(coordinates.values())
+        xlim = (min(xs), max(xs))
+        ylim = (min(ys), max(ys))
+        return xlim, ylim
+
+    def _get_solutions_to_derivatives(self):
+        a = -3*self.p(0) + 9*self.p(1) - 9*self.p(2) + 3*self.p(3)
+        b = 6*self.p(0) + -12*self.p(1) + 6*self.p(2)
+        c = -3*self.p(0) + 3*self.p(1)
+        tx1, tx2 = quadratic(a.real, b.real, c.real)
+        ty1, ty2 = quadratic(a.imag, b.imag, c.imag)
+        ts = [tx1, tx2, ty1, ty2]
+        solutions = []
+        for t in ts:
+            if t is not None and 0 <= t <= 1:
+                solutions.append(self.func(t))
+        return solutions
+
+
+class LinearBezier(Bezier):
+
+    def __init__(self, points):
+        super().__init__(points)
+        self.degree = 1
+
+    def func(self, t: float):
+        return lerp(self.p(0), self.p(1), t)
+
+    def get_lims(self):
+        possible_maxima_minima = [self.p(0), self.p(1)]
+        coordinates = {point.real: point.imag for point in possible_maxima_minima}
+        xs = list(coordinates.keys())
+        ys = list(coordinates.values())
+        xlim = (min(xs), max(xs))
+        ylim = (min(ys), max(ys))
+        return xlim, ylim
+
 
 class PolyBezier:
 
@@ -57,26 +83,28 @@ class PolyBezier:
         self.beziers = beziers
         self.num = len(self.beziers)
 
-    def func(self, t: float) -> complex:
-        index = int(t // (1 / self.num))
-        if index == self.num:
-            bez = self.beziers[index-1]
-        else:
-            bez = self.beziers[index]
-        #return bez.de_Casteljau(bez.points, t * self.num - index)
-        return bez.derived(t * self.num - index)
-
     def get_lims(self):
         """
         :return: The maximum and minimum values of real and imaginary values.
         """
-        dt = 0.001
-        value_dict = {t: self.func(t) for t in np.arange(0, 1+dt, dt)}
-        vals = value_dict.values()
-        real = [val.real for val in vals]
-        imag = [val.imag for val in vals]
-        xlim = (min(real), max(real))
-        ylim = (min(imag), max(imag))
+        xmin = math.inf
+        xmax = -math.inf
+        ymin = math.inf
+        ymax = -math.inf
+        for bez in self.beziers:
+            xlim, ylim = bez.get_lims()
+            poly_xmin, poly_xmax = xlim
+            poly_ymin, poly_ymax = ylim
+            if poly_xmin < xmin:
+                xmin = poly_xmin
+            if poly_xmax > xmax:
+                xmax = poly_xmax
+            if poly_ymin < ymin:
+                ymin = poly_ymin
+            if poly_ymax > ymax:
+                ymax = poly_ymax
+        xlim = (xmin, xmax)
+        ylim = (ymin, ymax)
         return xlim, ylim
 
     def __repr__(self) -> str:
