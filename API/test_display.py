@@ -269,7 +269,7 @@ def main(file_path, output=False, num_set=0):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        main("/Users/kohkihatori/NEA/API/example_pictures/d.svg")
+        main("/Users/kohkihatori/NEA/API/example_pictures/pi.svg")
         #print('Usage: python test_display.py "image file name" ')
     else:
         file_name = sys.argv[1]
