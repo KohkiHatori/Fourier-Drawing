@@ -25,7 +25,6 @@ class Bezier:
         return out
 
 
-
 class CubicBezier(Bezier):
 
     def __init__(self, points):
@@ -87,24 +86,11 @@ class PolyBezier:
         """
         :return: The maximum and minimum values of real and imaginary values.
         """
-        xmin = math.inf
-        xmax = -math.inf
-        ymin = math.inf
-        ymax = -math.inf
-        for bez in self.beziers:
-            xlim, ylim = bez.get_lims()
-            poly_xmin, poly_xmax = xlim
-            poly_ymin, poly_ymax = ylim
-            if poly_xmin < xmin:
-                xmin = poly_xmin
-            if poly_xmax > xmax:
-                xmax = poly_xmax
-            if poly_ymin < ymin:
-                ymin = poly_ymin
-            if poly_ymax > ymax:
-                ymax = poly_ymax
-        xlim = (xmin, xmax)
-        ylim = (ymin, ymax)
+        lims = {lim[0]: lim[1] for lim in [bez.get_lims() for bez in self.beziers]}
+        xs = list(lims.keys())
+        ys = list(lims.values())
+        xlim = (min(xs, key=lambda item: item[0])[0], max(xs, key=lambda item: item[1])[1])
+        ylim = (min(ys, key=lambda item: item[0])[0], max(ys, key=lambda item: item[1])[1])
         return xlim, ylim
 
     def __repr__(self) -> str:
