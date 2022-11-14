@@ -62,5 +62,6 @@ def quadratic(a: float| int, b: float| int, c: float| int):
         sol2 = None
     return sol1, sol2
 
+
 def two_d_dist(p1: complex, p2: complex) -> float:
     return math.sqrt((p1.real-p2.real)**2 + (p1.imag-p2.imag)**2)

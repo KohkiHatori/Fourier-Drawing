@@ -10,6 +10,7 @@ from math import pi
 from time import time
 from itertools import chain
 from config import *
+from merge import Merger
 
 
 # def frame(compVectors, t):
@@ -40,7 +41,7 @@ from config import *
 
 class ComplexVector:
 
-    def __init__(self, coefficient, n):
+    def __init__(self, coefficient: complex, n: int):
         self.coefficient = coefficient
         self.n = n
 
@@ -69,7 +70,7 @@ def animate(sets, xlim, ylim, output=False, show_vectors=True, axis_off=True):
     plt.gca().set_aspect('equal', adjustable='box')
     if axis_off:
         ax.axis("off")
-    lines = [plt.plot([], [], lw=PATH_WIDTH, color=PATH_COLOR)[0] for _ in range(len(sets))]
+    lines = [plt.plot([], [], lw=PATH_WIDTH, color=PATH_COLOUR)[0] for _ in range(len(sets))]
     if show_vectors:
         sets_of_vecs = [[plt.plot([], [], linewidth=VEC_WIDTH)[0] for _ in range(len(compVectors))] for compVectors in
                         sets]
@@ -147,7 +148,7 @@ def convert_to_svg(file_path: str) -> str:
     return svg
 
 
-def create_polybeziers(paths: list) -> list:
+def compile_polybeziers(paths: list) -> list:
     polys = []
     for path in paths:
         poly = PolyBezier(path)
@@ -160,8 +161,6 @@ def get_sets_coeffs(polys: list, num: int) -> list:
     for poly in polys:
         calc = Coefficient_calculator(poly, num)
         sets_of_coeffs.append(calc.main())
-        # func = Function(poly.func)
-        # sets_of_coeffs.append(func.get_coefficients())
     return sets_of_coeffs
 
 
@@ -173,9 +172,9 @@ def get_sets_compVec(sets_of_coeffs: list) -> list:
 
 
 def get_lims(polys: list):
-    lims = {lim[0]: lim[1] for lim in [poly.get_lims() for poly in polys]}
-    xs = list(lims.keys())
-    ys = list(lims.values())
+    lims = [poly.get_lims() for poly in polys]
+    xs = [lim[0] for lim in lims]
+    ys = [lim[1] for lim in lims]
     xlim = (min(xs, key=lambda item: item[0])[0], max(xs, key=lambda item: item[1])[1])
     ylim = (min(ys, key=lambda item: item[0])[0], max(ys, key=lambda item: item[1])[1])
     return xlim, ylim
@@ -190,20 +189,21 @@ def main(file_path, output=False, num_set=0):
     file = get_file_content(file_path)
 
     paths = SVG(file).parse_path()
-    #paths = merge(paths, num_set)
-    polybeziers = create_polybeziers(paths)
+    #paths = Merger(paths, num_set).main()
+    polybeziers = compile_polybeziers(paths)
     sets_of_coeffs = get_sets_coeffs(polybeziers, NUM_VECTORS)
     # Create compVector objects
     sets_of_compVectors = get_sets_compVec(sets_of_coeffs)
     final = time()
     print(f"Time taken: {final - initial}")
-    show_vectors = len(paths) > VEC_DISPLAY_THRESHOLD
+    show_vectors = len(paths) < VEC_DISPLAY_THRESHOLD
+    lims = get_lims(polybeziers)
     animate(sets_of_compVectors, *get_lims(polybeziers), output=output, show_vectors=show_vectors, axis_off=True)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        main("/Users/kohkihatori/NEA/API/example_pictures/pi.svg")
+        main("/Users/kohkihatori/NEA/API/example_pictures/mit.svg")
         # print('Usage: python test_display.py "image file name" ')
     else:
         file_name = sys.argv[1]
