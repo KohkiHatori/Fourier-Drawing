@@ -1,14 +1,18 @@
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from coeff import Coefficient_calculator
-from svg import SVG
-from bezier import *
+# Standard Library
 import sys
 import os
 from math import e
 from math import pi
 from time import time
+
 from itertools import chain
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+
+from coeff import Coefficient_calculator
+from svg import SVG
+from bezier import *
 from config import *
 
 
@@ -197,7 +201,7 @@ def main(file_path, output=False, num_set=0):
     sets_of_compVectors = get_sets_compVec(sets_of_coeffs)
     final = time()
     print(f"Time taken: {final - initial}")
-    show_vectors = len(paths) > VEC_DISPLAY_THRESHOLD
+    show_vectors = len(paths) < VEC_DISPLAY_THRESHOLD
     animate(sets_of_compVectors, *get_lims(polybeziers), output=output, show_vectors=show_vectors, axis_off=True)
 
 
