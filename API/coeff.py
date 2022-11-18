@@ -9,7 +9,7 @@ class Coefficient_calculator:
         self.num_coeff = num
         self.num_bez = len(self.poly_bezier)
 
-    def get_coefficient(self, n):
+    def get_coefficient(self, n: int):
         integrals = []
         self.denom = -n * 2 * pi * 1j
         for index, bezier in enumerate(self.poly_bezier.beziers):
@@ -26,7 +26,7 @@ class Coefficient_calculator:
             integrals.append(result)
         return sum(integrals)
 
-    def _get_integral_cubic(self, bezier, n):
+    def _get_integral_cubic(self, bezier, n: int) -> complex:
         a = -bezier.p(0) + 3 * bezier.p(1) - 3 * bezier.p(2) + bezier.p(3)
         b = 3 * bezier.p(0) - 6 * bezier.p(1) + 3 * bezier.p(2)
         c = -3 * bezier.p(0) + 3 * bezier.p(1)
@@ -41,7 +41,7 @@ class Coefficient_calculator:
             result = first + second + third + fourth
         return result
 
-    def _get_integral_linear(self, bezier, n):
+    def _get_integral_linear(self, bezier, n: int) -> complex:
         zero = bezier.p(0)
         one = bezier.p(1)
         if n == 0:
@@ -51,7 +51,7 @@ class Coefficient_calculator:
                     self.upper_e - self.lower_e) / (self.denom ** 2))
         return result
 
-    def main(self):
+    def main(self) -> dict:
         start = -round(self.num_coeff / 2 - 1)
         # The middle value of frequency should be 0, so the minimum frequency is "start"
         # e.g. If the NUM is 10, the minimum frequency is -4.

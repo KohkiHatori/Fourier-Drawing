@@ -36,9 +36,8 @@ class CubicBezier(Bezier):
 
     def get_lims(self):
         possible_maxima_minima = [self.p(0), self.p(1), *self._get_solutions_to_derivatives()]
-        coordinates = {point.real: point.imag for point in possible_maxima_minima}
-        xs = list(coordinates.keys())
-        ys = list(coordinates.values())
+        xs = [p.real for p in possible_maxima_minima]
+        ys = [p.imag for p in possible_maxima_minima]
         xlim = (min(xs), max(xs))
         ylim = (min(ys), max(ys))
         return xlim, ylim
@@ -68,9 +67,8 @@ class LinearBezier(Bezier):
 
     def get_lims(self):
         possible_maxima_minima = [self.p(0), self.p(1)]
-        coordinates = {point.real: point.imag for point in possible_maxima_minima}
-        xs = list(coordinates.keys())
-        ys = list(coordinates.values())
+        xs = [p.real for p in possible_maxima_minima]
+        ys = [p.imag for p in possible_maxima_minima]
         xlim = (min(xs), max(xs))
         ylim = (min(ys), max(ys))
         return xlim, ylim
@@ -86,9 +84,9 @@ class PolyBezier:
         """
         :return: The maximum and minimum values of real and imaginary values.
         """
-        lims = {lim[0]: lim[1] for lim in [bez.get_lims() for bez in self.beziers]}
-        xs = list(lims.keys())
-        ys = list(lims.values())
+        lims = [bez.get_lims() for bez in self.beziers]
+        xs = [lim[0] for lim in lims]
+        ys = [lim[1] for lim in lims]
         xlim = (min(xs, key=lambda item: item[0])[0], max(xs, key=lambda item: item[1])[1])
         ylim = (min(ys, key=lambda item: item[0])[0], max(ys, key=lambda item: item[1])[1])
         return xlim, ylim
