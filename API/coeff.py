@@ -12,11 +12,12 @@ class Coefficient_calculator:
     def get_coefficient(self, n: int):
         integrals = []
         self.denom = -n * 2 * pi * 1j
+        lower = 0
+        upper = 0
         for index, bezier in enumerate(self.poly_bezier.beziers):
-            self.upper = (index+1)/self.num_bez
-            self.lower = index/self.num_bez
-            self.upper_e = e ** (self.denom * self.upper)
-            self.lower_e = e ** (self.denom * self.lower)
+            upper += bezier.dist/self.poly_bezier.dist
+            self.upper_e = e ** (self.denom * upper)
+            self.lower_e = e ** (self.denom * lower)
             if bezier.degree == 3:
                 result = self._get_integral_cubic(bezier, n)
             elif bezier.degree == 1:
@@ -24,6 +25,7 @@ class Coefficient_calculator:
             else:
                 raise SyntaxError("Only cubic and linear bezier curves are supported.")
             integrals.append(result)
+            lower = upper
         return sum(integrals)
 
     def _get_integral_cubic(self, bezier, n: int) -> complex:
@@ -31,23 +33,25 @@ class Coefficient_calculator:
         b = 3 * bezier.p(0) - 6 * bezier.p(1) + 3 * bezier.p(2)
         c = -3 * bezier.p(0) + 3 * bezier.p(1)
         d = bezier.p(0)
+        dudt = self.poly_bezier.dist/bezier.dist
         if n == 0:
-            result = (a / 4 + b / 3 + c / 2 + d) / self.num_bez
+            result = (a / 4 + b / 3 + c / 2 + d) / dudt
         else:
             first = ((a + b + c + d) * self.upper_e - d * self.lower_e) / self.denom
-            second = -(self.num_bez * ((3 * a + 2 * b + c) * self.upper_e - c * self.lower_e) / (self.denom ** 2))
-            third = (self.num_bez ** 2 * ((6 * a + 2 * b) * self.upper_e - 2 * b * self.lower_e)) / (self.denom ** 3)
-            fourth = -((self.num_bez ** 3 * 6*a * (self.upper_e - self.lower_e)) / (self.denom ** 4))
+            second = -(dudt * ((3 * a + 2 * b + c) * self.upper_e - c * self.lower_e) / (self.denom ** 2))
+            third = (dudt ** 2 * ((6 * a + 2 * b) * self.upper_e - 2 * b * self.lower_e)) / (self.denom ** 3)
+            fourth = -((dudt ** 3 * 6*a * (self.upper_e - self.lower_e)) / (self.denom ** 4))
             result = first + second + third + fourth
         return result
 
     def _get_integral_linear(self, bezier, n: int) -> complex:
         zero = bezier.p(0)
         one = bezier.p(1)
+        dudt = self.poly_bezier.dist/bezier.dist
         if n == 0:
-            result = ((zero + (one - zero) / 2) / self.num_bez)
+            result = ((zero + (one - zero) / 2) / dudt)
         else:
-            result = ((one * self.upper_e - zero * self.lower_e) / self.denom) - (self.num_bez * (one - zero) * (
+            result = ((one * self.upper_e - zero * self.lower_e) / self.denom) - (dudt * (one - zero) * (
                     self.upper_e - self.lower_e) / (self.denom ** 2))
         return result
 

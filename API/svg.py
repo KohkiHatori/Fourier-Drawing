@@ -94,7 +94,8 @@ class SVG:
 
     def _process_z(self):
         self._process_coordinates()
-        self.funcs_temp.append(self._create_bezier([self.current_point, self.initial_point]))
+        if not self._same(self.current_point, self.initial_point):
+            self.funcs_temp.append(self._create_bezier([self.current_point, self.initial_point]))
         self.current_point = self.initial_point
         self.funcs.append(self.funcs_temp)
         self.funcs_temp = []
@@ -107,6 +108,10 @@ class SVG:
         else:
             raise ValueError("Only Linear and Cubic bezier is supported")
 
+    def _same(self, p0:complex, p1:complex):
+        if p0.real == p1.real and p0.imag == p1.imag:
+            return True
+        return False
 
 if __name__ == "__main__":
     with open("/Users/kohkihatori/NEA/API/pictures/apple.svg", "r") as f:

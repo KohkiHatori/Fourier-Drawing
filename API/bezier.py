@@ -1,4 +1,6 @@
 from utils import *
+from config import *
+import numpy as np
 
 
 class Bezier:
@@ -30,8 +32,9 @@ class CubicBezier(Bezier):
     def __init__(self, points):
         super().__init__(points)
         self.degree = 3
+        self.dist = self.get_dist()
 
-    def func(self, t: float):
+    def func(self, t: float) -> complex:
         return (1 - t) ** 3 * self.p(0) + 3 * (1 - t) ** 2 * t * self.p(1) + 3 * (1 - t) * t ** 2 * self.p(2) + t ** 3 * self.p(3)
 
     def get_lims(self):
@@ -55,12 +58,24 @@ class CubicBezier(Bezier):
                 solutions.append(self.func(t))
         return solutions
 
+    def get_dist(self) -> float:
+        t_steps = np.arange(0, 1+DT, DT)
+        points = []
+        dist = 0
+        for t in t_steps:
+            points.append(self.func(t))
+            if len(points) == 2:
+                dist += two_d_dist(points[0], points[1])
+                points.pop(0)
+        return dist
+
 
 class LinearBezier(Bezier):
 
     def __init__(self, points):
         super().__init__(points)
         self.degree = 1
+        self.dist = self.get_dist()
 
     def func(self, t: float):
         return lerp(self.p(0), self.p(1), t)
@@ -73,12 +88,16 @@ class LinearBezier(Bezier):
         ylim = (min(ys), max(ys))
         return xlim, ylim
 
+    def get_dist(self) -> float:
+        return two_d_dist(self.p(0), self.p(1))
+
 
 class PolyBezier:
 
     def __init__(self, beziers: list):
         self.beziers = beziers
         self.num = len(self.beziers)
+        self.dist = self.get_dist()
 
     def get_lims(self):
         """
@@ -90,6 +109,9 @@ class PolyBezier:
         xlim = (min(xs, key=lambda item: item[0])[0], max(xs, key=lambda item: item[1])[1])
         ylim = (min(ys, key=lambda item: item[0])[0], max(ys, key=lambda item: item[1])[1])
         return xlim, ylim
+
+    def get_dist(self):
+        return sum([bez.dist for bez in self.beziers])
 
     def __repr__(self) -> str:
         return f"PolyBezier object consisting of {self.num} bezier curves"
