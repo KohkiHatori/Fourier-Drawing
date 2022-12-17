@@ -1,6 +1,5 @@
 from utils import *
-from config import *
-import numpy as np
+from config import Config
 
 
 class Bezier:
@@ -59,7 +58,7 @@ class CubicBezier(Bezier):
         return solutions
 
     def get_dist(self) -> float:
-        t_steps = np.arange(0, 1+DT, DT)
+        t_steps = arange(0, 1 + Config.DT, Config.DT)
         points = []
         dist = 0
         for t in t_steps:

@@ -1,4 +1,4 @@
-import math
+from math import sqrt
 
 
 def get_filename(file_name: str):
@@ -26,6 +26,11 @@ def get_extension(file_name: str) -> str:
 
 
 def convert_coordinates_to_int(coordinates_in_string: str) -> complex:
+    """
+
+    @param coordinates_in_string: This should be in the form (
+    @return:
+    """
     points = list(map(float, (coordinates_in_string.split())))
     if len(points) == 2:
         coordinates = complex(points[0], points[1])
@@ -53,15 +58,27 @@ def lerp(p0: complex, p1: complex, t: float) -> complex:
 
 def quadratic(a: float | int, b: float | int, c: float | int):
     try:
-        sol1 = ((-b + math.sqrt(b ** 2 - 4 * a * c)) / (2 * a))
+        sol1 = ((-b + sqrt(b ** 2 - 4 * a * c)) / (2 * a))
     except (ValueError, ZeroDivisionError) as e:
         sol1 = None
     try:
-        sol2 = ((-b - math.sqrt(b ** 2 - 4 * a * c)) / (2 * a))
+        sol2 = ((-b - sqrt(b ** 2 - 4 * a * c)) / (2 * a))
     except (ValueError, ZeroDivisionError) as e:
         sol2 = None
     return sol1, sol2
 
 
 def two_d_dist(p1: complex, p2: complex) -> float:
-    return math.sqrt((p1.real - p2.real) ** 2 + (p1.imag - p2.imag) ** 2)
+    return sqrt((p1.real - p2.real) ** 2 + (p1.imag - p2.imag) ** 2)
+
+
+def arange(start: int, end: int, step: float | int = 1):
+    if start > end:
+        raise IndexError
+    li = []
+    num = int((end - start) / step)
+    element = start
+    for x in range(num):
+        li.append(element)
+        element += step
+    return li

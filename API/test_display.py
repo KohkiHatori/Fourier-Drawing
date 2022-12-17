@@ -4,43 +4,21 @@ import os
 from math import e
 from math import pi
 from time import time
+from random import choice
 
+# Third Party
 from itertools import chain
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
+# My Modules
 from coeff import Coefficient_calculator
 from svg import SVG
-from bezier import *
-from config import *
+from utils import *
+from config import Config
+from bezier import PolyBezier
 from merge import Merger
-
-
-# def frame(compVectors, t):
-#     #plt.style.use('dark_background')
-#     fig = plt.figure()
-#     ax = plt.axes(xlim=(-1.5, 1.5), ylim=(-1.5, 1.5))
-#     plt.gca().set_aspect('equal', adjustable='box')
-#     centre = np.array([0.0, 0.0])
-#     for vector in compVectors:
-#         circle = plt.Circle(tuple(centre), abs(vector.func(t)), fill=False)
-#         ax.add_patch(circle)
-#         centre += np.array([vector.func(t).real, vector.func(t).imag])
-#     data, origin = create_vec_data(compVectors, t)
-#     plt.quiver(*origin, data[:, 0], data[:, 1], scale=1, scale_units="xy", color="blue")
-#     plt.show()
-#
-# def create_vec_data(compVectors, t):
-#     data = []
-#     for vector in compVectors:
-#         data.append([vector.func(t).real, vector.func(t).imag])
-#     data = np.array(data)
-#     origin = np.insert(data, 0, [0, 0], axis=0)
-#     origin = np.delete(origin, -1, axis=0)
-#     origin = origin.transpose()
-#     origin = origin.cumsum(axis=1)
-#     return data, origin
 
 
 class ComplexVector:
@@ -63,25 +41,23 @@ def sum_comp_vec(vectors, t) -> int | float:
     return sum_vec
 
 
-def animate(sets, xlim, ylim, output=False, show_vectors=True, axis_off=True):
-    # number of frames.
-    plt.style.use(STYLE)
-    fig = plt.figure(figsize=FIG_SIZE)
+def animate(sets, xlim, ylim, output=False, show_vectors=True):
+    plt.style.use(Config.STYLE)
+    fig = plt.figure(figsize=Config.FIG_SIZE)
     x_range = xlim[1] - xlim[0]
     y_range = ylim[1] - ylim[0]
-    ax = plt.axes(xlim=(xlim[0] - x_range / MARGIN, xlim[1] + x_range / MARGIN),
-                  ylim=(ylim[0] - y_range / MARGIN, ylim[1] + y_range / MARGIN))
+    ax = plt.axes(xlim=(xlim[0] - x_range / Config.MARGIN_FACTOR, xlim[1] + x_range / Config.MARGIN_FACTOR),
+                  ylim=(ylim[0] - y_range / Config.MARGIN_FACTOR, ylim[1] + y_range / Config.MARGIN_FACTOR))
     plt.gca().set_aspect('equal', adjustable='box')
-    if axis_off:
-        ax.axis("off")
-    lines = [plt.plot([], [], lw=PATH_WIDTH, color=PATH_COLOUR)[0] for _ in range(len(sets))]
+    ax.axis(Config.AXIS)
+    lines = [plt.plot([], [], lw=Config.PATH_WIDTH, color=choice(Config.PATH_COLOURS))[0] for _ in range(len(sets))]
     if show_vectors:
-        sets_of_vecs = [[plt.plot([], [], linewidth=VEC_WIDTH)[0] for _ in range(len(compVectors))] for compVectors in
+        sets_of_vecs = [[plt.plot([], [], linewidth=Config.VEC_WIDTH)[0] for _ in range(len(compVectors))] for compVectors in
                         sets]
     xdatas = [[] for _ in range(len(sets))]
     ydatas = [[] for _ in range(len(sets))]
     def update(i):
-        t = i * (1 / NUM_FRAME)
+        t = i * (1 / Config.NUM_FRAME)
         if show_vectors:
             for compVectors, line, vecs, xdata, ydata in zip(sets, lines, sets_of_vecs, xdatas, ydatas):
                 x = 0
@@ -101,15 +77,13 @@ def animate(sets, xlim, ylim, output=False, show_vectors=True, axis_off=True):
                 x = 0
                 y = 0
                 for vector in compVectors:
-                    x_updated = x + vector.func(t).real
-                    y_updated = y + vector.func(t).imag
-                    x = x_updated
-                    y = y_updated
+                    x += vector.func(t).real
+                    y += vector.func(t).imag
                 xdata.append(x)
                 ydata.append(y)
                 line.set_data(xdata, ydata)
             return *lines,
-    ani = animation.FuncAnimation(fig, update, frames=NUM_FRAME, interval=1, repeat=True, blit=True)
+    ani = animation.FuncAnimation(fig, update, frames=Config.NUM_FRAME, interval=1, repeat=True, blit=True)
     if output:
         writervideo = animation.FFMpegWriter(fps=60)
         ani.save('test.mp4', writer=writervideo)
@@ -122,33 +96,23 @@ def create_compVectors(coefficients):
     for i in range(len(coefficients)):
         steps.append(index)
         index += (-1) ** (i % 2 != 0) * (i + 1)
-    compVectors = [ComplexVector(coefficients[list(coefficients.keys())[i]], list(coefficients.keys())[i]) for i in
-                   steps]
+    compVectors = []
+    for step in steps:
+        key = list(coefficients.keys())[step]
+        coeff = coefficients[key]
+        coeff = complex(coeff[0], coeff[1])
+        compVector = ComplexVector(coeff, key)
+        compVectors.append(compVector)
     return compVectors
 
-
-def potrace(pnm_path: str) -> str:
-    filename = get_filename(file_path)
-    svg = f"{filename}.svg"
-    os.system(f"potrace --flat {pnm_path} -s -o {svg}")
-    return f"{get_filename(pnm_path)}.svg"
-
-
-def convert_to_pnm(file_path: str) -> str:
+def convert_to_svg(file_path: str) -> str:
     filename = get_filename(file_path)
     pnm = f"{filename}.pnm"
     os.system(f"convert {file_path} -background white -alpha remove -alpha off {pnm}")
-    return pnm
-
-
-def delete_pnm(file_path: str):
-    os.remove(file_path)
-
-
-def convert_to_svg(file_path: str) -> str:
-    pnm = convert_to_pnm(file_path)
-    svg = potrace(pnm)
-    delete_pnm(pnm)
+    filename = get_filename(file_path)
+    svg = f"{filename}.svg"
+    os.system(f"potrace --flat {pnm} -s -o {svg}")
+    os.remove(pnm)
     return svg
 
 
@@ -160,10 +124,10 @@ def compile_polybeziers(paths: list) -> list:
     return polys
 
 
-def get_sets_coeffs(polys: list, num: int) -> list:
+def get_sets_coeffs(polys: list, num: int, by_dist: bool = False) -> list:
     sets_of_coeffs = []
     for poly in polys:
-        calc = Coefficient_calculator(poly, num)
+        calc = Coefficient_calculator(poly, num, by_dist)
         sets_of_coeffs.append(calc.main())
     return sets_of_coeffs
 
@@ -190,23 +154,25 @@ def main(file_path, output=False, num_set=0):
     if get_extension(file_path) != "svg":
         file_path = convert_to_svg(file_path)
     # Get polybezier from the svg file
-    file = get_file_content(file_path)
+    data = get_file_content(file_path)
 
-    paths = SVG(file).parse_path()
+    paths = SVG(data).parse_path()
     #paths = Merger(paths, num_set).main()
     polybeziers = compile_polybeziers(paths)
-    sets_of_coeffs = get_sets_coeffs(polybeziers, NUM_VECTORS)
+    sets_of_coeffs = get_sets_coeffs(polybeziers, Config.NUM_VECTORS, Config.BY_DIST)
     # Create compVector objects
+
+
     sets_of_compVectors = get_sets_compVec(sets_of_coeffs)
     final = time()
     print(f"Time taken: {final - initial}")
-    show_vectors = len(paths) < VEC_DISPLAY_THRESHOLD
-    animate(sets_of_compVectors, *get_lims(polybeziers), output=output, show_vectors=show_vectors, axis_off=True)
+    show_vectors = len(paths) < Config.VEC_DISPLAY_THRESHOLD
+    animate(sets_of_compVectors, *get_lims(polybeziers), output=output, show_vectors=show_vectors)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        main("/Users/kohkihatori/NEA/API/example_pictures/nike.svg")
+        main("/Users/kohkihatori/NEA/API/example_pictures/mona lisa.jpeg")
         # print('Usage: python test_display.py "image file name" ')
     else:
         file_name = sys.argv[1]
