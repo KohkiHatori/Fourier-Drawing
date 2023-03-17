@@ -1,5 +1,6 @@
-from math import pi, e
 from utils import *
+from math import e, pi
+
 
 
 class Coefficient_calculator:
@@ -80,6 +81,5 @@ class Coefficient_calculator:
         steps = arange(start, start + self.num_coeff)
         for n in steps:
             coeff = self.get_coefficient(n)
-            coeff = (coeff.real, coeff.imag)
             coeffs.append(coeff)
         return dict(zip(steps, coeffs))

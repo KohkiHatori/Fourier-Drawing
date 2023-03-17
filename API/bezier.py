@@ -9,7 +9,6 @@ class Bezier:
         2: "Quadratic",
         3: "Cubic",
         4: "Quartic",
-        5: "Quintic",
     }
 
     def __init__(self, points):

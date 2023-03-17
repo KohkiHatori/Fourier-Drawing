@@ -1,6 +1,6 @@
-import re
 from utils import *
 from bezier import CubicBezier, LinearBezier
+import re
 
 
 class SVG:
@@ -8,13 +8,27 @@ class SVG:
     def __init__(self, file_content: str):
         self.content = file_content
         self.funcs = []
+        self.size = self.get_size()
         self.path = self.get_path()
+
+    def get_size(self) -> tuple:
+        svg = re.findall("<svg.*>", self.content, flags=re.DOTALL)[0]
+        width = float(re.findall(r"width=\".*?pt", svg)[0][7:-2])
+        height = float(re.findall(r"height=\".*?pt", svg)[0][8:-2])
+        return width, height
 
     def get_path(self) -> list:
         path = re.findall("<path.*/>", self.content, flags=re.DOTALL)[0]
+        # Get a string inside the path element. The flag re.DOTALL is specified for the dot to cover the new line character as well
+        #<path matches the characters <path literally (case sensitive)
+        #. matches any character (except for line terminators)
+        #/> matches the characters /> literally (case sensitive)
         with_space = re.sub(r"\n", " ", path)
-        d = re.findall(r"\".*\"", with_space)[0][1:-1]
-        in_coordinates = re.findall(r"[a-zA-Z]?-?\d+\.?\d*\s-?\d+\.?\d*z?", d)
+        # Replace each new line character with a space character in the path
+        defition = re.findall(r"\".*\"", with_space)[0][1:-1]
+        # Get the definition which is inside the <path> element, removing the
+        in_coordinates = re.findall(r"[a-zA-Z]?-?\d+\.?\d*\s-?\d+\.?\d*z?", defition)
+        # Get a list of coordinates
         return in_coordinates
 
     def parse_path(self) -> list:
@@ -47,7 +61,7 @@ class SVG:
                 case "z" | "Z":
                     self._process_z()
                 case _:
-                    raise SyntaxError("incorrect SVG syntax")
+                    raise SyntaxError("invalid SVG syntax")
         else:
             self.point_in_int = convert_coordinates_to_int(point)
             self._process_coordinates()
@@ -94,7 +108,7 @@ class SVG:
 
     def _process_z(self):
         self._process_coordinates()
-        if not self._same(self.current_point, self.initial_point):
+        if self.current_point != self.initial_point:
             self.funcs_temp.append(self._create_bezier([self.current_point, self.initial_point]))
         self.current_point = self.initial_point
         self.funcs.append(self.funcs_temp)
@@ -107,11 +121,6 @@ class SVG:
             return LinearBezier(points)
         else:
             raise ValueError("Only Linear and Cubic bezier is supported")
-
-    def _same(self, p0:complex, p1:complex):
-        if p0.real == p1.real and p0.imag == p1.imag:
-            return True
-        return False
 
 if __name__ == "__main__":
     with open("/Users/kohkihatori/NEA/API/pictures/apple.svg", "r") as f:

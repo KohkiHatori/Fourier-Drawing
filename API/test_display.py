@@ -1,16 +1,16 @@
-# Standard Library
+"""
+Standard Library
+"""
 import sys
 import os
-from math import e
-from math import pi
-from time import time
 from random import choice
 
-# Third Party
+"""
+Third Party
+"""
 from itertools import chain
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-
 
 # My Modules
 from coeff import Coefficient_calculator
@@ -18,20 +18,8 @@ from svg import SVG
 from utils import *
 from config import Config
 from bezier import PolyBezier
-from merge import Merger
+from complex_vector import ComplexVector
 
-
-class ComplexVector:
-
-    def __init__(self, coefficient: complex, n: int):
-        self.coefficient = coefficient
-        self.n = n
-
-    def func(self, t) -> float:
-        return self.coefficient * (e ** (self.n * 2 * pi * 1j * t))
-
-    def __repr__(self) -> str:
-        pass
 
 
 def sum_comp_vec(vectors, t) -> int | float:
@@ -40,14 +28,14 @@ def sum_comp_vec(vectors, t) -> int | float:
         sum_vec += vector.func(t)
     return sum_vec
 
-
 def animate(sets, xlim, ylim, output=False, show_vectors=True):
     plt.style.use(Config.STYLE)
     fig = plt.figure(figsize=Config.FIG_SIZE)
     x_range = xlim[1] - xlim[0]
     y_range = ylim[1] - ylim[0]
-    ax = plt.axes(xlim=(xlim[0] - x_range / Config.MARGIN_FACTOR, xlim[1] + x_range / Config.MARGIN_FACTOR),
-                  ylim=(ylim[0] - y_range / Config.MARGIN_FACTOR, ylim[1] + y_range / Config.MARGIN_FACTOR))
+    # adding margins which have a size of the range multiplied by Config.MARGIN_FACTOR
+    ax = plt.axes(xlim=(xlim[0] - x_range * Config.MARGIN_FACTOR, xlim[1] + x_range * Config.MARGIN_FACTOR),
+                  ylim=(ylim[0] - y_range * Config.MARGIN_FACTOR, ylim[1] + y_range * Config.MARGIN_FACTOR))
     plt.gca().set_aspect('equal', adjustable='box')
     ax.axis(Config.AXIS)
     lines = [plt.plot([], [], lw=Config.PATH_WIDTH, color=choice(Config.PATH_COLOURS))[0] for _ in range(len(sets))]
@@ -63,8 +51,9 @@ def animate(sets, xlim, ylim, output=False, show_vectors=True):
                 x = 0
                 y = 0
                 for vector, plot in zip(compVectors, vecs):
-                    x_updated = x + vector.func(t).real
-                    y_updated = y + vector.func(t).imag
+                    z = vector.func(t)
+                    x_updated = x + z.real
+                    y_updated = y + z.imag
                     plot.set_data([x, x_updated], [y, y_updated])
                     x = x_updated
                     y = y_updated
@@ -77,8 +66,9 @@ def animate(sets, xlim, ylim, output=False, show_vectors=True):
                 x = 0
                 y = 0
                 for vector in compVectors:
-                    x += vector.func(t).real
-                    y += vector.func(t).imag
+                    z = vector.func(t)
+                    x += z.real
+                    y += z.imag
                 xdata.append(x)
                 ydata.append(y)
                 line.set_data(xdata, ydata)
@@ -86,23 +76,19 @@ def animate(sets, xlim, ylim, output=False, show_vectors=True):
     ani = animation.FuncAnimation(fig, update, frames=Config.NUM_FRAME, interval=1, repeat=True, blit=True)
     if output:
         writervideo = animation.FFMpegWriter(fps=60)
-        ani.save('test.mp4', writer=writervideo)
+        ani.save(get_output_name(), writer=writervideo)
     plt.show()
 
 
 def create_compVectors(coefficients):
     index = len(coefficients) // 2 - (len(coefficients) % 2 == 0)
-    steps = []
-    for i in range(len(coefficients)):
-        steps.append(index)
-        index += (-1) ** (i % 2 != 0) * (i + 1)
     compVectors = []
-    for step in steps:
-        key = list(coefficients.keys())[step]
+    for i in range(len(coefficients)):
+        key = list(coefficients.keys())[index]
         coeff = coefficients[key]
-        coeff = complex(coeff[0], coeff[1])
         compVector = ComplexVector(coeff, key)
         compVectors.append(compVector)
+        index += (-1) ** (i % 2 != 0) * (i + 1)
     return compVectors
 
 def convert_to_svg(file_path: str) -> str:

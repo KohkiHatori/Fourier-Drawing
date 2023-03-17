@@ -1,3 +1,4 @@
+from time import time
 from math import sqrt
 
 
@@ -82,3 +83,7 @@ def arange(start: int, end: int, step: float | int = 1):
         li.append(element)
         element += step
     return li
+
+
+def get_output_name():
+    return str(int(time())) + ".mp4"
