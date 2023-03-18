@@ -74,12 +74,14 @@ class Coefficient_calculator:
         return result
 
     def main(self) -> dict:
-        start = -round(self.num_coeff / 2 - 1)
-        # The middle value of frequency should be 0, so the minimum frequency is "start"
-        # e.g. If the NUM is 10, the minimum frequency is -4.
-        coeffs = []
-        steps = arange(start, start + self.num_coeff)
-        for n in steps:
+        n = 0
+        coeffs = {}
+        for i in range(self.num_coeff):
             coeff = self.get_coefficient(n)
-            coeffs.append(coeff)
-        return dict(zip(steps, coeffs))
+            coeffs.update({n: [coeff.real, coeff.imag]})
+            if i % 2 == 0:
+                n += i+1
+            else:
+                n *= -1
+        return coeffs
+

@@ -8,7 +8,6 @@ class Config:
     NUM_FRAME = 300
     FIG_SIZE = (19, 10)
     STYLE = "dark_background"
-    #PATH_COLOURS = ["r", "g", "w"]
     PATH_COLOURS = ["purple"]
     AXIS = "off"
     BY_DIST = False
@@ -20,7 +19,7 @@ class Config:
     ORIGIN = (0,0)
     VEC_DISPLAY_THRESHOLD = 10
     NUM_VECTORS = 100
-    DT = 0.001
+    DT = 0.01
 
 
     """

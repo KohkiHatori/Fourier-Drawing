@@ -12,7 +12,9 @@ from itertools import chain
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-# My Modules
+"""
+My modules
+"""
 from coeff import Coefficient_calculator
 from svg import SVG
 from utils import *
@@ -21,12 +23,6 @@ from bezier import PolyBezier
 from complex_vector import ComplexVector
 
 
-
-def sum_comp_vec(vectors, t) -> int | float:
-    sum_vec = 0
-    for vector in vectors:
-        sum_vec += vector.func(t)
-    return sum_vec
 
 def animate(sets, xlim, ylim, output=False, show_vectors=True):
     plt.style.use(Config.STYLE)
@@ -47,6 +43,7 @@ def animate(sets, xlim, ylim, output=False, show_vectors=True):
     def update(i):
         t = i * (1 / Config.NUM_FRAME)
         if show_vectors:
+            counter = 0
             for compVectors, line, vecs, xdata, ydata in zip(sets, lines, sets_of_vecs, xdatas, ydatas):
                 x = 0
                 y = 0
@@ -60,6 +57,7 @@ def animate(sets, xlim, ylim, output=False, show_vectors=True):
                 xdata.append(x)
                 ydata.append(y)
                 line.set_data(xdata, ydata)
+                counter += 1
             return *lines, *chain.from_iterable(sets_of_vecs)
         else:
             for compVectors, line, xdata, ydata in zip(sets, lines, xdatas, ydatas):
@@ -81,15 +79,12 @@ def animate(sets, xlim, ylim, output=False, show_vectors=True):
 
 
 def create_compVectors(coefficients):
-    index = len(coefficients) // 2 - (len(coefficients) % 2 == 0)
     compVectors = []
-    for i in range(len(coefficients)):
-        key = list(coefficients.keys())[index]
-        coeff = coefficients[key]
-        compVector = ComplexVector(coeff, key)
+    for n, coeff in coefficients.items():
+        compVector = ComplexVector(complex(coeff[0], coeff[1]), n)
         compVectors.append(compVector)
-        index += (-1) ** (i % 2 != 0) * (i + 1)
     return compVectors
+
 
 def convert_to_svg(file_path: str) -> str:
     filename = get_filename(file_path)
@@ -146,6 +141,7 @@ def main(file_path, output=False, num_set=0):
     #paths = Merger(paths, num_set).main()
     polybeziers = compile_polybeziers(paths)
     sets_of_coeffs = get_sets_coeffs(polybeziers, Config.NUM_VECTORS, Config.BY_DIST)
+    print(sets_of_coeffs[0])
     # Create compVector objects
 
 

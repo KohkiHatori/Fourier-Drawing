@@ -10,7 +10,6 @@ from config import Config
 from svg import SVG
 from bezier import PolyBezier
 from coeff import Coefficient_calculator
-from complex_vector import ComplexVector
 
 app = FastAPI()
 
@@ -37,12 +36,9 @@ async def process_image(file: UploadFile):
         svg_path = file_path
     paths = parse_svg(svg_path)
     poly_beziers = compile_polybeziers(paths)
-    num_bez = get_num_bez(poly_beziers)
+    xlim, ylim = get_lims(poly_beziers)
     sets_of_coeffs = get_sets_coeffs(poly_beziers, Config.NUM_VECTORS, Config.BY_DIST)
-    sets_of_compVectors = get_sets_compVec(sets_of_coeffs)
-    frames = get_frames(sets_of_compVectors, num_bez)
-    print("COMPLETE")
-    return json.dumps(frames)
+    return json.dumps(sets_of_coeffs, sort_keys=False)
 
 
 def save_image(file):
@@ -75,13 +71,6 @@ def compile_polybeziers(paths: list) -> list:
     return polys
 
 
-def get_num_bez(polybeziers):
-    num = 0
-    for polybezier in polybeziers:
-        num += len(polybezier)
-    return num
-
-
 def get_sets_coeffs(polys: list, num: int, by_dist: bool = False) -> list:
     sets_of_coeffs = []
     for poly in polys:
@@ -90,29 +79,18 @@ def get_sets_coeffs(polys: list, num: int, by_dist: bool = False) -> list:
     return sets_of_coeffs
 
 
-def get_sets_compVec(sets_of_coeffs: list) -> list:
-    sets_of_compVecs = []
-    for coeffs in sets_of_coeffs:
-        sets_of_compVecs.append(create_compVectors(coeffs))
-    return sets_of_compVecs
+def get_lims(polys: list):
+    lims = [poly.get_lims() for poly in polys]
+    xs = [lim[0] for lim in lims]
+    ys = [lim[1] for lim in lims]
+    xlim = (min(xs, key=lambda item: item[0])[0], max(xs, key=lambda item: item[1])[1])
+    ylim = (min(ys, key=lambda item: item[0])[0], max(ys, key=lambda item: item[1])[1])
+    return xlim, ylim
 
 
-def create_compVectors(coefficients):
-    index = len(coefficients) // 2 - (len(coefficients) % 2 == 0)
-    compVectors = []
-    for i in range(len(coefficients)):
-        key = list(coefficients.keys())[index]
-        coeff = coefficients[key]
-        compVector = ComplexVector(coeff, key)
-        compVectors.append(compVector)
-        index += (-1) ** (i % 2 != 0) * (i + 1)
-    return compVectors
-
-
-def get_frames(sets_of_compVec, num_bez):
+def get_frames(sets_of_compVec):
     frames = []
-    time_lim = 1
-    for t in arange(0, time_lim, Config.DT):
+    for t in arange(0, 1, Config.DT):
         frames.append(compile_frame(sets_of_compVec, t))
     return frames
 
