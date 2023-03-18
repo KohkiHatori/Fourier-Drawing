@@ -141,7 +141,6 @@ def main(file_path, output=False, num_set=0):
     #paths = Merger(paths, num_set).main()
     polybeziers = compile_polybeziers(paths)
     sets_of_coeffs = get_sets_coeffs(polybeziers, Config.NUM_VECTORS, Config.BY_DIST)
-    print(sets_of_coeffs[0])
     # Create compVector objects
 
 

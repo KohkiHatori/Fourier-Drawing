@@ -88,25 +88,5 @@ def get_lims(polys: list):
     return xlim, ylim
 
 
-def get_frames(sets_of_compVec):
-    frames = []
-    for t in arange(0, 1, Config.DT):
-        frames.append(compile_frame(sets_of_compVec, t))
-    return frames
-
-
-def compile_frame(sets_of_compVec: list, t) -> list:
-    frame = []
-    for set_of_compVec in sets_of_compVec:
-        vectors_and_magnitudes = []
-        for compVec in set_of_compVec:
-            f_of_t = compVec.func(t)
-            vectors = [f_of_t.real, f_of_t.imag]
-            magnitude = abs(f_of_t)
-            vectors_and_magnitudes.append([vectors, magnitude])
-        frame.append(vectors_and_magnitudes)
-    return frame
-
-
 if __name__ == "__main__":
     uvicorn.run("server:app", port=3000)
