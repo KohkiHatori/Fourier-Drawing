@@ -18,7 +18,7 @@ class Config:
     """
     ORIGIN = (0,0)
     VEC_DISPLAY_THRESHOLD = 10
-    NUM_VECTORS = 100
+    NUM_VECTORS = 150
     DT = 0.01
 
 

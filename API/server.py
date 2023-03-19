@@ -38,7 +38,11 @@ async def process_image(file: UploadFile):
     poly_beziers = compile_polybeziers(paths)
     xlim, ylim = get_lims(poly_beziers)
     sets_of_coeffs = get_sets_coeffs(poly_beziers, Config.NUM_VECTORS, Config.BY_DIST)
-    return json.dumps(sets_of_coeffs, sort_keys=False)
+    data = {
+        "lim": {"x": xlim, "y": ylim},
+        "sets_of_coeffs": sets_of_coeffs,
+    }
+    return json.dumps(data, sort_keys=False)
 
 
 def save_image(file):
